@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "Texture2D.h"
 #include <math.h>
+#include <vulkan/vulkan.h>
 
 using namespace std;
 Renderer* renderer;
