@@ -86,13 +86,8 @@ set(SRCS
         src/OpenGL/Texture2DGL.cpp
         src/OpenGL/TransformGL.cpp
         src/OpenGL/VertexBufferGL.cpp
-        src/Camera.cpp
-        src/DepthStencil.cpp
         src/DrawInfo.cpp
         src/main.cpp
-        src/MeshPart.cpp
-        src/Pass.cpp
-        src/RenderTarget.cpp
         src/Scene.cpp
         src/Technique.cpp
     )
@@ -101,7 +96,7 @@ set(HEADERS
         src/Base/ConstantBuffer.hpp
         src/Base/Material.hpp
         src/Base/Mesh.hpp
-        src/Base//Renderer.hpp
+        src/Base/Renderer.hpp
         src/Base/RenderState.hpp
         src/Base/ResourceBinding.hpp
         src/Base/Sampler2D.hpp
@@ -118,13 +113,8 @@ set(HEADERS
         src/OpenGL/Texture2DGL.hpp
         src/OpenGL/TransformGL.hpp
         src/OpenGL/VertexBufferGL.hpp
-        src/Camera.hpp
-        src/DepthStencil.hpp
         src/DrawInfo.hpp
         src/IA.h
-        src/MeshPart.hpp
-        src/Pass.hpp
-        src/RenderTarget.hpp
         src/Scene.hpp
         src/Technique.hpp
     )

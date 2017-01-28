@@ -172,8 +172,6 @@ void OpenGLRenderer::clearBuffer(unsigned int flag)
 	glClear(glFlags);
 };
 
-void OpenGLRenderer::setRenderTarget(RenderTarget* rt) {};
-
 void OpenGLRenderer::setRenderState(RenderState* ps)
 {
 	// naive implementation

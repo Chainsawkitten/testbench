@@ -3,8 +3,6 @@
 #include <unordered_map>
 #include <Windows.h>
 
-#include "../RenderTarget.hpp"
-#include "../DepthStencil.hpp"
 #include "RenderState.hpp"
 #include "../DrawInfo.hpp"
 #include "../Technique.hpp"
@@ -51,7 +49,6 @@ public:
 
 	virtual void setClearColor(float, float, float, float) = 0;
 	virtual void clearBuffer(unsigned int) = 0;
-	virtual void setRenderTarget(RenderTarget* rt) = 0; // complete parameters
 	// can be partially overriden by a specific Technique.
 	virtual void setRenderState(RenderState* ps) = 0;
 	// submit work (to render) to the renderer.

@@ -27,7 +27,6 @@ public:
 
 	void setClearColor(float, float, float, float);
 	void clearBuffer(unsigned int);
-	void setRenderTarget(RenderTarget* rt); // complete parameters
 	void setRenderState(RenderState* ps);
 	void submit(Mesh* mesh);
 	void frame();
