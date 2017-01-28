@@ -41,6 +41,30 @@ function(create_directory_groups)
     endforeach()
 endfunction()
 
+# Copy assets
+set(ASSETS
+        assets/textures/fatboy.png
+        assets/GL45/FragmentShader.glsl
+        assets/GL45/VertexShader.glsl
+    )
+
+add_custom_target(AssetTarget ALL)
+
+function(CopyAsset inputfile outdir)
+    set(outputfile ${outdir}/${inputfile})
+    
+    add_custom_command(
+        TARGET AssetTarget
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${inputfile} ${outputfile}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Copying ${inputfile}"
+    )
+endfunction()
+
+foreach(item ${ASSETS})
+    CopyAsset(${item} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+endforeach()
+
 set(SRCS
         src/Camera.cpp
         src/ConstantBuffer.cpp
