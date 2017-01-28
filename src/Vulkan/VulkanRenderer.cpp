@@ -14,11 +14,6 @@ VulkanRenderer::~VulkanRenderer() {
     
 }
 
-int VulkanRenderer::shutdown() {
-    UNIMPLEMENTED
-    return -1;
-}
-
 Mesh* VulkanRenderer::makeMesh() { 
     UNIMPLEMENTED
     return nullptr;
@@ -69,16 +64,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     return -1;
 }
 
-void VulkanRenderer::submit(Mesh* mesh) {
+int VulkanRenderer::shutdown() {
     UNIMPLEMENTED
-}
-
-void VulkanRenderer::frame() {
-    UNIMPLEMENTED
-}
-
-void VulkanRenderer::present() {
-    UNIMPLEMENTED
+    return -1;
 }
 
 void VulkanRenderer::setClearColor(float r, float g, float b, float a) {
@@ -90,5 +78,17 @@ void VulkanRenderer::clearBuffer(unsigned int flag) {
 }
 
 void VulkanRenderer::setRenderState(RenderState* ps) {
+    UNIMPLEMENTED
+}
+
+void VulkanRenderer::submit(Mesh* mesh) {
+    UNIMPLEMENTED
+}
+
+void VulkanRenderer::frame() {
+    UNIMPLEMENTED
+}
+
+void VulkanRenderer::present() {
     UNIMPLEMENTED
 }
