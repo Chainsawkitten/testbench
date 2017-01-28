@@ -45,7 +45,7 @@ ConstantBuffer* OpenGLRenderer::makeConstantBuffer(std::string NAME, unsigned in
 }
 
 std::string OpenGLRenderer::getShaderPath() {
-	return std::string("..\\assets\\GL45\\");
+	return std::string("assets/GL45/");
 }
 
 std::string OpenGLRenderer::getShaderExtension() {
