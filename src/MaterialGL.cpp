@@ -6,6 +6,7 @@
 #include <vector>
 #include <set>
 #include <assert.h>
+#include <iostream>
 
 #include "MaterialGL.h"
 
@@ -82,6 +83,7 @@ void MaterialGL::setDiffuse(Color c)
 
 void MaterialGL::setShader(const std::string& shaderFileName, ShaderType type)
 {
+    std::cout << shaderFileName << std::endl;
 	if (shaderFileNames.find(type) != shaderFileNames.end())
 	{
 		// removeShader is implemented in a concrete class
@@ -169,14 +171,12 @@ int MaterialGL::compileMaterial(std::string& errString)
 	// compile shaders
 	std::string err;
 	if (compileShader(ShaderType::VS, err) < 0) {
-		errString = err;
-		exit(-1);
-		//return -1;
+		std::cout << err << std::endl;
+		return -1;
 	};
 	if (compileShader(ShaderType::PS, err) < 0) {
-		errString = err;
-		exit(-1);
-		//return -1;
+		std::cout << err << std::endl;
+		return -1;
 	};
 	
 	// try to link the program
