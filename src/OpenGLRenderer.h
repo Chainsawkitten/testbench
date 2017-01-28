@@ -17,7 +17,6 @@ public:
 	ConstantBuffer* makeConstantBuffer(std::string NAME, unsigned int location);
 	ResourceBinding* makeResourceBinding();
 	RenderState* makeRenderState();
-	Technique* makeTechnique() {};
 	Texture2D* makeTexture2D();
 	Sampler2D* makeSampler2D();
 	std::string getShaderPath();
