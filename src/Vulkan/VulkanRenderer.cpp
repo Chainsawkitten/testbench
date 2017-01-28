@@ -4,6 +4,7 @@
 #include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
 #include "RenderStateVulkan.hpp"
+#include "Texture2DVulkan.hpp"
 
 #define UNIMPLEMENTED {\
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
@@ -22,8 +23,7 @@ Mesh* VulkanRenderer::makeMesh() {
 }
 
 Texture2D* VulkanRenderer::makeTexture2D() {
-    UNIMPLEMENTED
-    return nullptr;
+    return new Texture2DVulkan();
 }
 
 Sampler2D* VulkanRenderer::makeSampler2D() {
