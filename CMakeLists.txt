@@ -42,11 +42,67 @@ function(create_directory_groups)
 endfunction()
 
 set(SRCS
+        src/Camera.cpp
+        src/ConstantBuffer.cpp
+        src/ConstantBufferGL.cpp
+        src/DepthStencil.cpp
+        src/DrawInfo.cpp
         src/main.cpp
+        src/Material.cpp
+        src/MaterialGL.cpp
+        src/Mesh.cpp
+        src/MeshGL.cpp
+        src/MeshPart.cpp
+        src/OpenGLRenderer.cpp
+        src/Pass.cpp
+        src/Renderer.cpp
+        src/RenderState.cpp
+        src/RenderStateGL.cpp
+        src/RenderTarget.cpp
+        src/ResourceBinding.cpp
+        src/ResourceBindingGL.cpp
+        src/Sampler2D.cpp
+        src/Sampler2DGL.cpp
+        src/Scene.cpp
+        src/Technique.cpp
+        src/Texture2D.cpp
+        src/Texture2DGL.cpp
+        src/Transform.cpp
+        src/TransformGL.cpp
+        src/VertexBuffer.cpp
+        src/VertexBufferGL.cpp
     )
 
 set(HEADERS
-        
+        src/Camera.h
+        src/ConstantBuffer.h
+        src/ConstantBufferGL.h
+        src/DepthStencil.h
+        src/DrawInfo.h
+        src/IA.h
+        src/Material.h
+        src/MaterialGL.h
+        src/Mesh.h
+        src/MeshGL.h
+        src/MeshPart.h
+        src/OpenGLRenderer.h
+        src/Pass.h
+        src/Renderer.h
+        src/RenderState.h
+        src/RenderStateGL.h
+        src/RenderTarget.h
+        src/ResourceBinding.h
+        src/ResourceBindingGL.h
+        src/Sampler2D.h
+        src/Sampler2DGL.h
+        src/Scene.h
+        src/Technique.h
+        src/Texture2D.h
+        src/Texture2DGL.h
+        src/Transform.h
+        src/TransformGL.h
+        src/VertexBuffer.h
+        src/VertexBufferGL.h
     )
 
 create_directory_groups(${SRCS} ${HEADERS})
