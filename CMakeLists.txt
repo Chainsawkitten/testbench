@@ -71,7 +71,6 @@ set(SRCS
         src/Base/Mesh.cpp
         src/Base/Renderer.cpp
         src/Base/RenderState.cpp
-        src/Base/ResourceBinding.cpp
         src/Base/Sampler2D.cpp
         src/Base/Texture2D.cpp
         src/Base/Transform.cpp
@@ -81,7 +80,6 @@ set(SRCS
         src/OpenGL/MeshGL.cpp
         src/OpenGL/OpenGLRenderer.cpp
         src/OpenGL/RenderStateGL.cpp
-        src/OpenGL/ResourceBindingGL.cpp
         src/OpenGL/Sampler2DGL.cpp
         src/OpenGL/Texture2DGL.cpp
         src/OpenGL/TransformGL.cpp
@@ -96,7 +94,6 @@ set(HEADERS
         src/Base/Mesh.hpp
         src/Base/Renderer.hpp
         src/Base/RenderState.hpp
-        src/Base/ResourceBinding.hpp
         src/Base/Sampler2D.hpp
         src/Base/Texture2D.hpp
         src/Base/Transform.hpp
@@ -106,7 +103,6 @@ set(HEADERS
         src/OpenGL/MeshGL.hpp
         src/OpenGL/OpenGLRenderer.hpp
         src/OpenGL/RenderStateGL.hpp
-        src/OpenGL/ResourceBindingGL.hpp
         src/OpenGL/Sampler2DGL.hpp
         src/OpenGL/Texture2DGL.hpp
         src/OpenGL/TransformGL.hpp

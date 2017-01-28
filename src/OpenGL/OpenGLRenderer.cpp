@@ -5,7 +5,6 @@
 #include "MaterialGL.hpp"
 #include "MeshGL.hpp"
 #include "../Technique.hpp"
-#include "ResourceBindingGL.hpp"
 #include "RenderStateGL.hpp"
 #include "VertexBufferGL.hpp"
 #include "ConstantBufferGL.hpp"
@@ -58,10 +57,6 @@ VertexBuffer* OpenGLRenderer::makeVertexBuffer() {
 
 Material* OpenGLRenderer::makeMaterial() { 
 	return new MaterialGL(); 
-}
-
-ResourceBinding* OpenGLRenderer::makeResourceBinding() { 
-	return new ResourceBindingGL(); 
 }
 
 RenderState* OpenGLRenderer::makeRenderState() { 

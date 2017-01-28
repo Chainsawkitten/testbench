@@ -15,7 +15,6 @@ public:
 	Mesh* makeMesh();
 	VertexBuffer* makeVertexBuffer();
 	ConstantBuffer* makeConstantBuffer(std::string NAME, unsigned int location);
-	ResourceBinding* makeResourceBinding();
 	RenderState* makeRenderState();
 	Texture2D* makeTexture2D();
 	Sampler2D* makeSampler2D();

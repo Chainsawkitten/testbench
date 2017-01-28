@@ -12,10 +12,6 @@ class VertexBuffer;
 class Texture2D;
 class Sampler2D;
 
-//CRITICAL_SECTION protectHere;
-//#define LOCK EnterCriticalSection(&protectHere)
-//#define UNLOCK LeaveCriticalSection(&protectHere)
-
 namespace CLEAR_BUFFER_FLAGS {
 	static const int COLOR = 1;
 	static const int DEPTH = 2;
@@ -35,7 +31,6 @@ public:
 	virtual VertexBuffer* makeVertexBuffer() = 0;
 	virtual Texture2D* makeTexture2D() = 0;
 	virtual Sampler2D* makeSampler2D() = 0;
-	virtual ResourceBinding* makeResourceBinding() = 0;
 	virtual RenderState* makeRenderState() = 0;
 	virtual std::string getShaderPath() = 0;
 	virtual std::string getShaderExtension() = 0;

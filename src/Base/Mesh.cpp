@@ -1,10 +1,13 @@
 #include "Mesh.hpp"
-#include "ResourceBinding.hpp"
 
 
 Mesh::Mesh()
 {
 };
+
+Mesh::~Mesh()
+{
+}
 
 /*
 	buffer: is a VertexBuffer*
@@ -30,8 +33,4 @@ void Mesh::addTexture(Texture2D* texture, unsigned int slot)
 {
 	// would override the slot if there is another pointer here.
 	textures[slot] = texture;
-}
-
-Mesh::~Mesh()
-{
 }
