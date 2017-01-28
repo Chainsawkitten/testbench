@@ -6,7 +6,7 @@ class ConstantBufferGL : public ConstantBuffer
 {
 public:
 	ConstantBufferGL(std::string NAME, unsigned int location);
-	~ConstantBufferGL();
+	~ConstantBufferGL() final;
 	void setData(const void* data, size_t size, Material* m, unsigned int location);
 	void bind(Material*);
 
