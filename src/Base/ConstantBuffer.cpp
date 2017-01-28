@@ -1,8 +1,5 @@
 #include "ConstantBuffer.hpp"
 
-
-
-ConstantBuffer::~ConstantBuffer()
-{
+ConstantBuffer::~ConstantBuffer() {
+    
 }
-

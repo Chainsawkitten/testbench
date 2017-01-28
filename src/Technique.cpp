@@ -21,5 +21,3 @@ void Technique::enable(Renderer* renderer)
 	renderer->setRenderState(renderState);
 	material->enable();
 }
-
-//void Technique::setBindings(std::vector<ResourceBinding*>* rb) { bindings = rb; }
