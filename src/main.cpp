@@ -238,22 +238,23 @@ int initialiseTestbench()
 void shutdown() {
 	// shutdown.
 	// delete dynamic objects
-	for (auto m : materials)
+	for (Material* m : materials)
 	{
-		delete(m);
+		delete m;
 	}
-	for (auto t : techniques)
+	for (Technique* t : techniques)
 	{
-		delete(t);
+		delete t;
 	}
-	for (auto m : scene)
+	for (Mesh* m : scene)
 	{
 		for (auto g : m->geometryBuffers)
 		{
 			if (g.second.buffer != nullptr)
 				delete g.second.buffer;
 		}
-		delete(m);
+        delete m->txBuffer;
+		delete m;
 	}
 	renderer->shutdown();
 };
