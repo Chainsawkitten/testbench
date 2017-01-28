@@ -1,6 +1,7 @@
 #include "VulkanRenderer.hpp"
 
 #include <iostream>
+#include "ConstantBufferVulkan.hpp"
 #include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
 #include "RenderStateVulkan.hpp"
@@ -32,9 +33,8 @@ Sampler2D* VulkanRenderer::makeSampler2D() {
     return new Sampler2DVulkan();
 }
 
-ConstantBuffer* VulkanRenderer::makeConstantBuffer(std::string NAME, unsigned int location) { 
-    UNIMPLEMENTED
-    return nullptr;
+ConstantBuffer* VulkanRenderer::makeConstantBuffer(std::string name, unsigned int location) { 
+    return new ConstantBufferVulkan(name, location);
 }
 
 std::string VulkanRenderer::getShaderPath() {

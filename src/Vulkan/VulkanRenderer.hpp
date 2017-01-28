@@ -10,7 +10,7 @@ class VulkanRenderer : public Renderer {
         Material* makeMaterial();
         Mesh* makeMesh();
         VertexBuffer* makeVertexBuffer();
-        ConstantBuffer* makeConstantBuffer(std::string NAME, unsigned int location);
+        ConstantBuffer* makeConstantBuffer(std::string name, unsigned int location);
         RenderState* makeRenderState();
         Texture2D* makeTexture2D();
         Sampler2D* makeSampler2D();
