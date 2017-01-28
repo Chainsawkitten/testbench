@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "Technique.h"
-#include "Renderer.h"
+#include "Technique.hpp"
+#include "Base/Renderer.hpp"
 
 
 

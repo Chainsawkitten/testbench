@@ -66,67 +66,67 @@ foreach(item ${ASSETS})
 endforeach()
 
 set(SRCS
+        src/Base/ConstantBuffer.cpp
+        src/Base/Material.cpp
+        src/Base/Mesh.cpp
+        src/Base/Renderer.cpp
+        src/Base/RenderState.cpp
+        src/Base/ResourceBinding.cpp
+        src/Base/Sampler2D.cpp
+        src/Base/Texture2D.cpp
+        src/Base/Transform.cpp
+        src/Base/VertexBuffer.cpp
+        src/OpenGL/ConstantBufferGL.cpp
+        src/OpenGL/MaterialGL.cpp
+        src/OpenGL/MeshGL.cpp
+        src/OpenGL/OpenGLRenderer.cpp
+        src/OpenGL/RenderStateGL.cpp
+        src/OpenGL/ResourceBindingGL.cpp
+        src/OpenGL/Sampler2DGL.cpp
+        src/OpenGL/Texture2DGL.cpp
+        src/OpenGL/TransformGL.cpp
+        src/OpenGL/VertexBufferGL.cpp
         src/Camera.cpp
-        src/ConstantBuffer.cpp
-        src/ConstantBufferGL.cpp
         src/DepthStencil.cpp
         src/DrawInfo.cpp
         src/main.cpp
-        src/Material.cpp
-        src/MaterialGL.cpp
-        src/Mesh.cpp
-        src/MeshGL.cpp
         src/MeshPart.cpp
-        src/OpenGLRenderer.cpp
         src/Pass.cpp
-        src/Renderer.cpp
-        src/RenderState.cpp
-        src/RenderStateGL.cpp
         src/RenderTarget.cpp
-        src/ResourceBinding.cpp
-        src/ResourceBindingGL.cpp
-        src/Sampler2D.cpp
-        src/Sampler2DGL.cpp
         src/Scene.cpp
         src/Technique.cpp
-        src/Texture2D.cpp
-        src/Texture2DGL.cpp
-        src/Transform.cpp
-        src/TransformGL.cpp
-        src/VertexBuffer.cpp
-        src/VertexBufferGL.cpp
     )
 
 set(HEADERS
-        src/Camera.h
-        src/ConstantBuffer.h
-        src/ConstantBufferGL.h
-        src/DepthStencil.h
-        src/DrawInfo.h
+        src/Base/ConstantBuffer.hpp
+        src/Base/Material.hpp
+        src/Base/Mesh.hpp
+        src/Base//Renderer.hpp
+        src/Base/RenderState.hpp
+        src/Base/ResourceBinding.hpp
+        src/Base/Sampler2D.hpp
+        src/Base/Texture2D.hpp
+        src/Base/Transform.hpp
+        src/Base/VertexBuffer.hpp
+        src/OpenGL/ConstantBufferGL.hpp
+        src/OpenGL/MaterialGL.hpp
+        src/OpenGL/MeshGL.hpp
+        src/OpenGL/OpenGLRenderer.hpp
+        src/OpenGL/RenderStateGL.hpp
+        src/OpenGL/ResourceBindingGL.hpp
+        src/OpenGL/Sampler2DGL.hpp
+        src/OpenGL/Texture2DGL.hpp
+        src/OpenGL/TransformGL.hpp
+        src/OpenGL/VertexBufferGL.hpp
+        src/Camera.hpp
+        src/DepthStencil.hpp
+        src/DrawInfo.hpp
         src/IA.h
-        src/Material.h
-        src/MaterialGL.h
-        src/Mesh.h
-        src/MeshGL.h
-        src/MeshPart.h
-        src/OpenGLRenderer.h
-        src/Pass.h
-        src/Renderer.h
-        src/RenderState.h
-        src/RenderStateGL.h
-        src/RenderTarget.h
-        src/ResourceBinding.h
-        src/ResourceBindingGL.h
-        src/Sampler2D.h
-        src/Sampler2DGL.h
-        src/Scene.h
-        src/Technique.h
-        src/Texture2D.h
-        src/Texture2DGL.h
-        src/Transform.h
-        src/TransformGL.h
-        src/VertexBuffer.h
-        src/VertexBufferGL.h
+        src/MeshPart.hpp
+        src/Pass.hpp
+        src/RenderTarget.hpp
+        src/Scene.hpp
+        src/Technique.hpp
     )
 
 create_directory_groups(${SRCS} ${HEADERS})

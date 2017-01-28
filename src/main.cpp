@@ -3,9 +3,9 @@
 #include <SDL_events.h>
 #include <type_traits> 
 
-#include "Renderer.h"
-#include "Mesh.h"
-#include "Texture2D.h"
+#include "Base/Renderer.hpp"
+#include "Base/Mesh.hpp"
+#include "Base/Texture2D.hpp"
 #include <math.h>
 
 using namespace std;
