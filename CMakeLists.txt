@@ -88,7 +88,6 @@ set(SRCS
         src/OpenGL/VertexBufferGL.cpp
         src/DrawInfo.cpp
         src/main.cpp
-        src/Scene.cpp
         src/Technique.cpp
     )
 
@@ -115,7 +114,6 @@ set(HEADERS
         src/OpenGL/VertexBufferGL.hpp
         src/DrawInfo.hpp
         src/IA.h
-        src/Scene.hpp
         src/Technique.hpp
     )
 
