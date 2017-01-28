@@ -13,6 +13,12 @@ set(BUILD_UTILS OFF CACHE BOOL "Don't build GLEW utility programs" FORCE)
 add_subdirectory(externals/glew/build/cmake)
 include_directories(externals/glew/include)
 
+# SDL
+set(SDL_SHARED OFF CACHE BOOL "Don't build shared SDL")
+set(VIDEO_OPENGLES OFF CACHE BOOL "Don't include OpenGL ES support")
+add_subdirectory(externals/SDL)
+include_directories(externals/SDL/include)
+
 # GLM
 include_directories(externals/glm)
 
@@ -46,6 +52,6 @@ set(HEADERS
 create_directory_groups(${SRCS} ${HEADERS})
 
 add_executable(Testbench ${SRCS} ${HEADERS})
-target_link_libraries(Testbench glew)
+target_link_libraries(Testbench glew ${SDL2_LIBRARIES})
 set_property(TARGET Testbench PROPERTY CXX_STANDARD 11)
 set_property(TARGET Testbench PROPERTY CXX_STANDARD_REQUIRED ON)
