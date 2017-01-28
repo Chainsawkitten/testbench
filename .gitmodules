@@ -7,3 +7,6 @@
 [submodule "externals/SDL"]
 	path = externals/SDL
 	url = https://github.com/SDL-mirror/SDL.git
+[submodule "externals/stb"]
+	path = externals/stb
+	url = https://github.com/nothings/stb.git
