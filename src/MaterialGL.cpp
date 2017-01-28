@@ -155,6 +155,9 @@ int MaterialGL::compileShader(ShaderType type, std::string& errString)
 	std::string err2;
 	COMPILE_LOG(newShader, Shader, err2);
 	shaderObjects[shaderIdx] = newShader;
+    
+    delete[] tempShaderLines;
+    
 	return 0;
 }
 
