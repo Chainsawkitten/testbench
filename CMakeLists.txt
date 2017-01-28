@@ -108,6 +108,6 @@ set(HEADERS
 create_directory_groups(${SRCS} ${HEADERS})
 
 add_executable(Testbench ${SRCS} ${HEADERS})
-target_link_libraries(Testbench glew ${SDL2_LIBRARIES})
+target_link_libraries(Testbench glew SDL2main SDL2-static)
 set_property(TARGET Testbench PROPERTY CXX_STANDARD 11)
 set_property(TARGET Testbench PROPERTY CXX_STANDARD_REQUIRED ON)
