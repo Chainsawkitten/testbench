@@ -6,7 +6,7 @@ class RenderStateGL : public RenderState
 {
 public:
 	RenderStateGL();
-	~RenderStateGL();
+	~RenderStateGL() final;
 	void setWireFrame(bool);
 	void set();
 
