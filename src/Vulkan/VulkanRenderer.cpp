@@ -6,6 +6,7 @@
 #include "RenderStateVulkan.hpp"
 #include "Sampler2DVulkan.hpp"
 #include "Texture2DVulkan.hpp"
+#include "VertexBufferVulkan.hpp"
 
 #define UNIMPLEMENTED {\
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
@@ -47,8 +48,7 @@ std::string VulkanRenderer::getShaderExtension() {
 }
 
 VertexBuffer* VulkanRenderer::makeVertexBuffer() { 
-    UNIMPLEMENTED
-    return nullptr;
+    return new VertexBufferVulkan();
 }
 
 Material* VulkanRenderer::makeMaterial() { 

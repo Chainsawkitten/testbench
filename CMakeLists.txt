@@ -95,6 +95,7 @@ set(SRCS
         src/Vulkan/RenderStateVulkan.cpp
         src/Vulkan/Sampler2DVulkan.cpp
         src/Vulkan/Texture2DVulkan.cpp
+        src/Vulkan/VertexBufferVulkan.cpp
         src/Vulkan/VulkanRenderer.cpp
         src/main.cpp
         src/Technique.cpp
@@ -124,6 +125,7 @@ set(HEADERS
         src/Vulkan/RenderStateVulkan.hpp
         src/Vulkan/Sampler2DVulkan.hpp
         src/Vulkan/Texture2DVulkan.hpp
+        src/Vulkan/VertexBufferVulkan.hpp
         src/Vulkan/VulkanRenderer.hpp
         src/IA.h
         src/Technique.hpp
