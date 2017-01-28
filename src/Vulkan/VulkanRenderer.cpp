@@ -1,6 +1,7 @@
 #include "VulkanRenderer.hpp"
 
 #include <iostream>
+#include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
 
 #define UNIMPLEMENTED {\
@@ -50,8 +51,7 @@ VertexBuffer* VulkanRenderer::makeVertexBuffer() {
 }
 
 Material* VulkanRenderer::makeMaterial() { 
-    UNIMPLEMENTED
-    return nullptr;
+    return new MaterialVulkan();
 }
 
 RenderState* VulkanRenderer::makeRenderState() { 
