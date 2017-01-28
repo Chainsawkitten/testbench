@@ -18,6 +18,7 @@ Renderer* renderer;
 vector<Mesh*> scene;
 vector<Material*> materials;
 vector<Technique*> techniques;
+Texture2D* fatboy;
 
 // forward decls
 void updateScene();
@@ -192,7 +193,7 @@ int initialiseTestbench()
 
 
 	// create texture
-	Texture2D* fatboy = renderer->makeTexture2D();
+	fatboy = renderer->makeTexture2D();
 	fatboy->loadFromFile("assets/textures/fatboy.png");
 	fatboy->sampler = renderer->makeSampler2D();
 	fatboy->sampler->setWrap(WRAPPING::REPEAT, WRAPPING::REPEAT);
@@ -257,6 +258,10 @@ void shutdown() {
         delete m->txBuffer;
 		delete m;
 	}
+    
+    delete fatboy->sampler;
+    delete fatboy;
+    
 	renderer->shutdown();
 };
 
