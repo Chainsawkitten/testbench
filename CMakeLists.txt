@@ -92,6 +92,7 @@ set(SRCS
         src/OpenGL/VertexBufferGL.cpp
         src/Vulkan/MaterialVulkan.cpp
         src/Vulkan/MeshVulkan.cpp
+        src/Vulkan/RenderStateVulkan.cpp
         src/Vulkan/VulkanRenderer.cpp
         src/main.cpp
         src/Technique.cpp
@@ -118,6 +119,7 @@ set(HEADERS
         src/OpenGL/VertexBufferGL.hpp
         src/Vulkan/MaterialVulkan.hpp
         src/Vulkan/MeshVulkan.hpp
+        src/Vulkan/RenderStateVulkan.hpp
         src/Vulkan/VulkanRenderer.hpp
         src/IA.h
         src/Technique.hpp

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
+#include "RenderStateVulkan.hpp"
 
 #define UNIMPLEMENTED {\
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
@@ -55,8 +56,7 @@ Material* VulkanRenderer::makeMaterial() {
 }
 
 RenderState* VulkanRenderer::makeRenderState() { 
-    UNIMPLEMENTED
-    return nullptr;
+    return new RenderStateVulkan();
 }
 
 int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
