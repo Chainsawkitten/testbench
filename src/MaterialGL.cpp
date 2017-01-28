@@ -83,7 +83,6 @@ void MaterialGL::setDiffuse(Color c)
 
 void MaterialGL::setShader(const std::string& shaderFileName, ShaderType type)
 {
-    std::cout << shaderFileName << std::endl;
 	if (shaderFileNames.find(type) != shaderFileNames.end())
 	{
 		// removeShader is implemented in a concrete class
@@ -139,10 +138,6 @@ int MaterialGL::compileShader(ShaderType type, std::string& errString)
 
 	// make final vector<string> with shader source + defines + GLSL version
 	std::vector<std::string> shaderLines = expandShaderText(shaderText, type);
-
-	// debug
-	for (auto ex : shaderLines) 
-		DBOUTW(ex.c_str());
 
 	// OpenGL wants an array of GLchar* with null terminated strings 
 	const GLchar** tempShaderLines = new const GLchar*[shaderLines.size()];
