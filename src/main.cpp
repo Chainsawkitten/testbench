@@ -73,7 +73,7 @@ void updateScene()
 	translation[2] = 0.0;
 
 
-	for (int i = 1; i < scene.size(); i++)
+	for (size_t i = 1; i < scene.size(); i++)
 	{
 		translation[0] = xt[(i+shift) % (4*360)];
 		translation[1] = yt[(i+shift) % (4*360)];
