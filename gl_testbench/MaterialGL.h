@@ -72,7 +72,7 @@ private:
 
 	// TODO: change to PIPELINE
 	// opengl program object
-	GLuint program;
+	GLuint program = 0;
 	int compileShader(ShaderType type, std::string& errString);
 	std::vector<std::string> expandShaderText(std::string& shaderText, ShaderType type);
 
