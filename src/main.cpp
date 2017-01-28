@@ -244,6 +244,7 @@ void shutdown() {
 	}
 	for (Technique* t : techniques)
 	{
+        delete t->renderState;
 		delete t;
 	}
 	for (Mesh* m : scene)
