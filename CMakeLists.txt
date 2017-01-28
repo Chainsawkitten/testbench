@@ -25,6 +25,12 @@ include_directories(externals/glm)
 # STB
 include_directories(externals/stb)
 
+# Vulkan
+find_library(Vulkan_LIBRARY vulkan-1)
+find_path(VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h HINTS
+        "$ENV{VULKAN_SDK}/include")
+include_directories(${VULKAN_INCLUDE_DIR})
+
 # This function should be passed a list of all files in a target. It will automatically generate
 # file groups following the directory hierarchy, so that the layout of the files in IDEs matches the
 # one in the filesystem.
@@ -114,6 +120,6 @@ set(HEADERS
 create_directory_groups(${SRCS} ${HEADERS})
 
 add_executable(Testbench ${SRCS} ${HEADERS})
-target_link_libraries(Testbench glew SDL2main SDL2-static)
+target_link_libraries(Testbench glew SDL2main SDL2-static ${Vulkan_LIBRARIES})
 set_property(TARGET Testbench PROPERTY CXX_STANDARD 11)
 set_property(TARGET Testbench PROPERTY CXX_STANDARD_REQUIRED ON)
