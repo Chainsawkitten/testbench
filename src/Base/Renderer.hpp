@@ -4,7 +4,6 @@
 #include <Windows.h>
 
 #include "RenderState.hpp"
-#include "../DrawInfo.hpp"
 #include "../Technique.hpp"
 #include "ConstantBuffer.hpp"
 

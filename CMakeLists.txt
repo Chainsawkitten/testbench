@@ -86,7 +86,6 @@ set(SRCS
         src/OpenGL/Texture2DGL.cpp
         src/OpenGL/TransformGL.cpp
         src/OpenGL/VertexBufferGL.cpp
-        src/DrawInfo.cpp
         src/main.cpp
         src/Technique.cpp
     )
@@ -112,7 +111,6 @@ set(HEADERS
         src/OpenGL/Texture2DGL.hpp
         src/OpenGL/TransformGL.hpp
         src/OpenGL/VertexBufferGL.hpp
-        src/DrawInfo.hpp
         src/IA.h
         src/Technique.hpp
     )
