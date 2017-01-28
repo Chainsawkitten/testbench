@@ -93,6 +93,7 @@ set(SRCS
         src/Vulkan/MaterialVulkan.cpp
         src/Vulkan/MeshVulkan.cpp
         src/Vulkan/RenderStateVulkan.cpp
+        src/Vulkan/Sampler2DVulkan.cpp
         src/Vulkan/Texture2DVulkan.cpp
         src/Vulkan/VulkanRenderer.cpp
         src/main.cpp
@@ -121,6 +122,7 @@ set(HEADERS
         src/Vulkan/MaterialVulkan.hpp
         src/Vulkan/MeshVulkan.hpp
         src/Vulkan/RenderStateVulkan.hpp
+        src/Vulkan/Sampler2DVulkan.hpp
         src/Vulkan/Texture2DVulkan.hpp
         src/Vulkan/VulkanRenderer.hpp
         src/IA.h

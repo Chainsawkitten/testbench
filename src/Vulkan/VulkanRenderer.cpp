@@ -4,6 +4,7 @@
 #include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
 #include "RenderStateVulkan.hpp"
+#include "Sampler2DVulkan.hpp"
 #include "Texture2DVulkan.hpp"
 
 #define UNIMPLEMENTED {\
@@ -27,8 +28,7 @@ Texture2D* VulkanRenderer::makeTexture2D() {
 }
 
 Sampler2D* VulkanRenderer::makeSampler2D() {
-    UNIMPLEMENTED
-    return nullptr;
+    return new Sampler2DVulkan();
 }
 
 ConstantBuffer* VulkanRenderer::makeConstantBuffer(std::string NAME, unsigned int location) { 
