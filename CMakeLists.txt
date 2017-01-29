@@ -90,6 +90,14 @@ set(SRCS
         src/OpenGL/Texture2DGL.cpp
         src/OpenGL/TransformGL.cpp
         src/OpenGL/VertexBufferGL.cpp
+        src/Vulkan/ConstantBufferVulkan.cpp
+        src/Vulkan/MaterialVulkan.cpp
+        src/Vulkan/MeshVulkan.cpp
+        src/Vulkan/RenderStateVulkan.cpp
+        src/Vulkan/Sampler2DVulkan.cpp
+        src/Vulkan/Texture2DVulkan.cpp
+        src/Vulkan/VertexBufferVulkan.cpp
+        src/Vulkan/VulkanRenderer.cpp
         src/main.cpp
         src/Technique.cpp
     )
@@ -113,6 +121,14 @@ set(HEADERS
         src/OpenGL/Texture2DGL.hpp
         src/OpenGL/TransformGL.hpp
         src/OpenGL/VertexBufferGL.hpp
+        src/Vulkan/ConstantBufferVulkan.hpp
+        src/Vulkan/MaterialVulkan.hpp
+        src/Vulkan/MeshVulkan.hpp
+        src/Vulkan/RenderStateVulkan.hpp
+        src/Vulkan/Sampler2DVulkan.hpp
+        src/Vulkan/Texture2DVulkan.hpp
+        src/Vulkan/VertexBufferVulkan.hpp
+        src/Vulkan/VulkanRenderer.hpp
         src/IA.h
         src/Technique.hpp
     )
