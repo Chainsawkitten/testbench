@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vulkan/vulkan.h>
 #include <SDL.h>
 #include "../Base/Renderer.hpp"
 
@@ -30,4 +31,6 @@ class VulkanRenderer : public Renderer {
         
     private:
         SDL_Window* window;
+        
+        VkInstance instance;
 };

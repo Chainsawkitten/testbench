@@ -1,7 +1,6 @@
 #include "VulkanRenderer.hpp"
 
 #include <iostream>
-#include <vulkan/vulkan.h>
 #include "ConstantBufferVulkan.hpp"
 #include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
@@ -61,6 +60,29 @@ RenderState* VulkanRenderer::makeRenderState() {
 }
 
 int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
+    // Create Vulkan instance.
+    VkApplicationInfo appInfo = {};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "Vulkan Testbench";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "No Engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+    
+    const char* extensionNames[] = { VK_KHR_SURFACE_EXTENSION_NAME };
+    
+    VkInstanceCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
+    createInfo.enabledExtensionCount = 1;
+    createInfo.ppEnabledExtensionNames = extensionNames;
+    createInfo.enabledLayerCount = 0;
+    
+    if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+        std::cout << "Failed to create instance." << std::endl;
+        exit(-1);
+    }
+    
     // Init SDL.
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         fprintf(stderr, "%s", SDL_GetError());
@@ -68,9 +90,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     }
     
     // Create window.
-    window = SDL_CreateWindow("OpenGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
-    
-    // TODO: Init Vulkan.
+    window = SDL_CreateWindow("Vulkan", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
     
     UNIMPLEMENTED
     return -1;
