@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <vulkan/vulkan.h>
-#include <SDL.h>
 #include "ConstantBufferVulkan.hpp"
 #include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
@@ -68,7 +67,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
         exit(-1);
     }
     
-    // TODO: Create window.
+    // Create window.
+    window = SDL_CreateWindow("OpenGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
     
     // TODO: Init Vulkan.
     

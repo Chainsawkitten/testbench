@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL.h>
 #include "../Base/Renderer.hpp"
 
 class VulkanRenderer : public Renderer {
@@ -26,4 +27,7 @@ class VulkanRenderer : public Renderer {
         void submit(Mesh* mesh);
         void frame();
         void present();
+        
+    private:
+        SDL_Window* window;
 };
