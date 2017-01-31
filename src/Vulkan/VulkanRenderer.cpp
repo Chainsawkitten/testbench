@@ -97,8 +97,11 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 }
 
 int VulkanRenderer::shutdown() {
-    UNIMPLEMENTED
-    return -1;
+    SDL_DestroyWindow(window);
+    
+    vkDestroyInstance(instance, nullptr);
+    
+    return 0;
 }
 
 void VulkanRenderer::setClearColor(float r, float g, float b, float a) {
