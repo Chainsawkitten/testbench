@@ -1,6 +1,8 @@
 #include "VulkanRenderer.hpp"
 
 #include <iostream>
+#include <vulkan/vulkan.h>
+#include <SDL.h>
 #include "ConstantBufferVulkan.hpp"
 #include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
@@ -60,6 +62,16 @@ RenderState* VulkanRenderer::makeRenderState() {
 }
 
 int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
+    // Init SDL.
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+        fprintf(stderr, "%s", SDL_GetError());
+        exit(-1);
+    }
+    
+    // TODO: Create window.
+    
+    // TODO: Init Vulkan.
+    
     UNIMPLEMENTED
     return -1;
 }
