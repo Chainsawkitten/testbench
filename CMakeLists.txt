@@ -26,9 +26,17 @@ include_directories(externals/glm)
 include_directories(externals/stb)
 
 # Vulkan
-find_library(Vulkan_LIBRARY vulkan-1)
-find_path(VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h HINTS
-        "$ENV{VULKAN_SDK}/include")
+if(WIN32)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        find_library(Vulkan_LIBRARY vulkan-1 PATHS "$ENV{VULKAN_SDK}/Bin")
+    elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        find_library(Vulkan_LIBRARY vulkan-1 PATHS "$ENV{VULKAN_SDK}/Bin32")
+    endif()
+else()
+    find_library(Vulkan_LIBRARY vulkan-1 PATHS "$ENV{VULKAN_SDK}/lib")
+endif()
+
+find_path(VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h HINTS "$ENV{VULKAN_SDK}/include")
 include_directories(${VULKAN_INCLUDE_DIR})
 
 # This function should be passed a list of all files in a target. It will automatically generate
@@ -136,6 +144,6 @@ set(HEADERS
 create_directory_groups(${SRCS} ${HEADERS})
 
 add_executable(Testbench ${SRCS} ${HEADERS})
-target_link_libraries(Testbench glew SDL2main SDL2-static ${Vulkan_LIBRARIES})
+target_link_libraries(Testbench glew SDL2main SDL2-static ${Vulkan_LIBRARY})
 set_property(TARGET Testbench PROPERTY CXX_STANDARD 11)
 set_property(TARGET Testbench PROPERTY CXX_STANDARD_REQUIRED ON)
