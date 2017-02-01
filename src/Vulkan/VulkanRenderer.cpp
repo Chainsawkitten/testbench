@@ -92,6 +92,39 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create window.
     window = SDL_CreateWindow("Vulkan", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
     
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+
+    uint32_t deviceCount = 0;
+
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+    if(deviceCount == 0){
+        std::cout << "Failed to find GPU's with Vulkan support." << std::endl;
+    }
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+    for(const auto& device : devices){
+        VkPhysicalDeviceProperties deviceProperties;
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceProperties(device, &deviceProperties);
+        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+        //Checking for discrete (dedicated) GPU and geometry shader feature.
+        //TODO: Check for actually necessary GPU features.
+        if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+                && deviceFeatures.geometryShader){
+            std::cout << "Found suitable GPU." << std::endl;
+            physicalDevice = device;
+            break;
+        }
+    }
+
+    if(physicalDevice == VK_NULL_HANDLE){
+        std::cout << "Failed to find suitable GPU's." << std::endl;
+    }
+
     UNIMPLEMENTED
     return -1;
 }
