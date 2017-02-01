@@ -96,9 +96,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
-    if(deviceCount == 0){
+    if(deviceCount == 0)
         std::cout << "Failed to find GPU's with Vulkan support." << std::endl;
-    }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
@@ -119,8 +118,25 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
         }
     }
 
-    if(physicalDevice == VK_NULL_HANDLE){
+    if(physicalDevice == VK_NULL_HANDLE)
         std::cout << "Failed to find suitable GPU's." << std::endl;
+
+    int graphicsFamily = -1;
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(10);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+
+    //Check for available queue families.
+    int i = 0;
+    for(const auto& queueFamily : queueFamilies){
+        if(queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            graphicsFamily = i;
+
+        if(graphicsFamily >= 0)
+            break;
+        i++;
     }
 
     UNIMPLEMENTED
