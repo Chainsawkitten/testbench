@@ -110,6 +110,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 
         //Checking for discrete (dedicated) GPU and geometry shader feature.
         //TODO: Check for actually necessary GPU features.
+        //Maybe: Wrap this in a function that takes as argument the things we are looking for.
         if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
                 && deviceFeatures.geometryShader){
             std::cout << "Found suitable GPU." << std::endl;
@@ -125,7 +126,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
 
-    std::vector<VkQueueFamilyProperties> queueFamilies(10);
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
 
     //Check for available queue families.
@@ -138,6 +139,31 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
             break;
         i++;
     }
+
+    std::cout << "Found " << queueFamilyCount << "queue families." << std::endl;
+
+    VkDeviceQueueCreateInfo queueCreateInfo = {};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = graphicsFamily;
+    queueCreateInfo.queueCount = 1;
+
+    //Queue priority between 0.0f - 1.0f
+    float queuePriority = 1.0f;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+
+    //Device features.
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+
+    VkDeviceCreateInfo deviceCreateInfo = {};
+    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+
+    if(vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
+        std::cout << "Could not create logical device" << std::endl;
+
+    vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
 
     UNIMPLEMENTED
     return -1;

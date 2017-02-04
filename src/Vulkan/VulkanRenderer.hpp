@@ -35,4 +35,6 @@ class VulkanRenderer : public Renderer {
         VkInstance instance;
 
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+        VkDevice logicalDevice;
+        VkQueue graphicsQueue;
 };
