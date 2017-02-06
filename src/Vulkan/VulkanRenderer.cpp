@@ -140,7 +140,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
         i++;
     }
 
-    std::cout << "Found " << queueFamilyCount << "queue families." << std::endl;
+    std::cout << "Found " << queueFamilyCount << " queue families." << std::endl;
 
     VkDeviceQueueCreateInfo queueCreateInfo = {};
     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -161,8 +161,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 
     if(vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
-        std::cout << "Could not create logical device" << std::endl;
-
+        std::cout << "Could not create logical device." << std::endl;
+    else
+        std::cout << "Logical device created." << std::endl;
     vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
 
     UNIMPLEMENTED
