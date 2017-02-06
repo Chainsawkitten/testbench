@@ -108,11 +108,10 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
         vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-        //Checking for discrete (dedicated) GPU and geometry shader feature.
+        //Checking for discrete (dedicated) GPU.
         //TODO: Check for actually necessary GPU features.
         //Maybe: Wrap this in a function that takes as argument the things we are looking for.
-        if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-                && deviceFeatures.geometryShader){
+        if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
             std::cout << "Found suitable GPU." << std::endl;
             physicalDevice = device;
             break;
