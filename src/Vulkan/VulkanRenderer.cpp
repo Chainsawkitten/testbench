@@ -18,7 +18,8 @@ VulkanRenderer::VulkanRenderer() {
 }
 
 VulkanRenderer::~VulkanRenderer() {
-    
+    vkDestroyDevice(logicalDevice, nullptr);
+    vkDestroyInstance(instance, nullptr);
 }
 
 Mesh* VulkanRenderer::makeMesh() { 
