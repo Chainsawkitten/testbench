@@ -170,10 +170,12 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 }
 
 int VulkanRenderer::shutdown() {
+    vkDestroyDevice(logicalDevice, nullptr);
+
     SDL_DestroyWindow(window);
     
     vkDestroyInstance(instance, nullptr);
-    vkDestroyDevice(logicalDevice, nullptr);
+
 
     return 0;
 }
