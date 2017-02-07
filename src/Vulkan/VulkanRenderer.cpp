@@ -18,8 +18,7 @@ VulkanRenderer::VulkanRenderer() {
 }
 
 VulkanRenderer::~VulkanRenderer() {
-    vkDestroyDevice(logicalDevice, nullptr);
-    vkDestroyInstance(instance, nullptr);
+
 }
 
 Mesh* VulkanRenderer::makeMesh() { 
@@ -174,7 +173,8 @@ int VulkanRenderer::shutdown() {
     SDL_DestroyWindow(window);
     
     vkDestroyInstance(instance, nullptr);
-    
+    vkDestroyDevice(logicalDevice, nullptr);
+
     return 0;
 }
 
