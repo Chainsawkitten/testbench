@@ -18,7 +18,7 @@ VulkanRenderer::VulkanRenderer() {
 }
 
 VulkanRenderer::~VulkanRenderer() {
-    
+
 }
 
 Mesh* VulkanRenderer::makeMesh() { 
@@ -91,16 +91,92 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     
     // Create window.
     window = SDL_CreateWindow("Vulkan", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
-    
+
+    uint32_t deviceCount = 0;
+
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+    if(deviceCount == 0)
+        std::cout << "Failed to find GPU's with Vulkan support." << std::endl;
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+    for(const auto& device : devices){
+        VkPhysicalDeviceProperties deviceProperties;
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceProperties(device, &deviceProperties);
+        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+        //Checking for discrete (dedicated) GPU.
+        //TODO: Check for actually necessary GPU features.
+        //Maybe: Wrap this in a function that takes as argument the things we are looking for.
+        if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
+            std::cout << "Found suitable GPU." << std::endl;
+            physicalDevice = device;
+            break;
+        }
+    }
+
+    if(physicalDevice == VK_NULL_HANDLE)
+        std::cout << "Failed to find suitable GPU's." << std::endl;
+
+    int graphicsFamily = -1;
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+
+    //Check for available queue families.
+    int i = 0;
+    for(const auto& queueFamily : queueFamilies){
+        if(queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            graphicsFamily = i;
+
+        if(graphicsFamily >= 0)
+            break;
+        i++;
+    }
+
+    std::cout << "Found " << queueFamilyCount << " queue families." << std::endl;
+
+    VkDeviceQueueCreateInfo queueCreateInfo = {};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = graphicsFamily;
+    queueCreateInfo.queueCount = 1;
+
+    //Queue priority between 0.0f - 1.0f
+    float queuePriority = 1.0f;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+
+    //Device features.
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+
+    VkDeviceCreateInfo deviceCreateInfo = {};
+    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+
+    if(vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
+        std::cout << "Could not create logical device." << std::endl;
+    else
+        std::cout << "Logical device created." << std::endl;
+    vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
+
     UNIMPLEMENTED
     return -1;
 }
 
 int VulkanRenderer::shutdown() {
+    vkDestroyDevice(logicalDevice, nullptr);
+
     SDL_DestroyWindow(window);
     
     vkDestroyInstance(instance, nullptr);
-    
+
+
     return 0;
 }
 

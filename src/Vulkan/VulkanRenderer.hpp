@@ -33,4 +33,8 @@ class VulkanRenderer : public Renderer {
         SDL_Window* window;
         
         VkInstance instance;
+
+        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+        VkDevice logicalDevice;
+        VkQueue graphicsQueue;
 };
