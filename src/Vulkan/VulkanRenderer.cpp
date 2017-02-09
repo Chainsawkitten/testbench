@@ -1,6 +1,11 @@
+#define VK_PROTOTYPES
+#define VK_USE_PLATFORM_WIN32_KHR
+
 #include "VulkanRenderer.hpp"
 
 #include <iostream>
+#include <SDL_syswm.h>
+
 #include "ConstantBufferVulkan.hpp"
 #include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
@@ -69,16 +74,16 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
     
-    const char* extensionNames[] = { VK_KHR_SURFACE_EXTENSION_NAME };
+    const char* extensionNames[] = { VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
     
-    VkInstanceCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    createInfo.pApplicationInfo = &appInfo;
-    createInfo.enabledExtensionCount = 1;
-    createInfo.ppEnabledExtensionNames = extensionNames;
-    createInfo.enabledLayerCount = 0;
+    VkInstanceCreateInfo instanceCreateInfo = {};
+    instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    instanceCreateInfo.pApplicationInfo = &appInfo;
+    instanceCreateInfo.enabledExtensionCount = 1;
+    instanceCreateInfo.ppEnabledExtensionNames = extensionNames;
+    instanceCreateInfo.enabledLayerCount = 0;
     
-    if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+    if (vkCreateInstance(&instanceCreateInfo, nullptr, &instance) != VK_SUCCESS) {
         std::cout << "Failed to create instance." << std::endl;
         exit(-1);
     }
@@ -164,6 +169,18 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     else
         std::cout << "Logical device created." << std::endl;
     vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
+
+    //Todo: move into private.
+    VkSurfaceKHR surface;
+
+    SDL_SysWMinfo wmInfo;
+    SDL_GetWindowWMInfo(window, &wmInfo);
+    VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo;
+    win32SurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    win32SurfaceCreateInfo.hwnd = wmInfo.info.win.window;
+    win32SurfaceCreateInfo.hinstance = wmInfo.info.win.hinstance;
+
+    vkCreateWin32SurfaceKHR(instance, &win32SurfaceCreateInfo, nullptr, nullptr);
 
     UNIMPLEMENTED
     return -1;
