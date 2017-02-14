@@ -85,6 +85,10 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     
     // Create window.
     window = SDL_CreateWindow("Vulkan", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
+    if (window == nullptr) {
+        std::cerr << "Cound not create SDL window." << std::endl;
+        exit(-1);
+    }
     
     // Create surface to render to.
     SDL_SysWMinfo wmInfo;
