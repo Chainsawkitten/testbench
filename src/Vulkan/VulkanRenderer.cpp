@@ -324,4 +324,9 @@ void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
     swapChainCreateInfo.imageExtent = extent;
     swapChainCreateInfo.imageArrayLayers = 1;
     swapChainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    
+    /// @todo Handle case where graphics queue is not the same as the present queue.
+    swapChainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    swapChainCreateInfo.queueFamilyIndexCount = 0;
+    swapChainCreateInfo.pQueueFamilyIndices = nullptr;
 }
