@@ -30,6 +30,9 @@ class VulkanRenderer : public Renderer {
         void present();
         
     private:
+        void createInstance();
+        void createDevice();
+        
         SDL_Window* window;
         
         VkInstance instance;
