@@ -381,8 +381,7 @@ void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
     swapChainCreateInfo.queueFamilyIndexCount = 0;
     swapChainCreateInfo.pQueueFamilyIndices = nullptr;
     
-    /// @todo Determine pretransform based on current transform in swap chain.
-    swapChainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+    swapChainCreateInfo.preTransform = swapChainSupport.capabilities.currentTransform;
     swapChainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     swapChainCreateInfo.presentMode = presentMode;
     swapChainCreateInfo.clipped = VK_TRUE;
