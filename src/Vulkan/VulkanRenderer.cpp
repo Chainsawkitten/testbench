@@ -390,4 +390,9 @@ void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
         std::cerr << "Failed to create swap chain." << std::endl;
         exit(-1);
     }
+    
+    // Get swap chain images.
+    vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, nullptr);
+    swapChainImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, swapChainImages.data());
 }
