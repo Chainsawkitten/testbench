@@ -89,9 +89,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create logical device.
     createDevice();
     
-    //Todo: move into private.
-    VkSurfaceKHR surface;
-
+    // Create surface to render to.
     SDL_SysWMinfo wmInfo;
     SDL_GetWindowWMInfo(window, &wmInfo);
     VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo;
@@ -106,6 +104,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 }
 
 int VulkanRenderer::shutdown() {
+    vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyDevice(logicalDevice, nullptr);
     
     SDL_DestroyWindow(window);
