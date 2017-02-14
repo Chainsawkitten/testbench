@@ -92,11 +92,12 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     
     // Create surface to render to.
     SDL_SysWMinfo windowInfo;
+    SDL_VERSION(&windowInfo.version);
     SDL_GetWindowWMInfo(window, &windowInfo);
     
     VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
     surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-    surfaceCreateInfo.hinstance = GetModuleHandle(NULL);
+    surfaceCreateInfo.hinstance = windowInfo.info.win.hinstance;
     surfaceCreateInfo.hwnd = windowInfo.info.win.window;
     
     if (vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface) != VK_SUCCESS) {
@@ -116,8 +117,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 
 int VulkanRenderer::shutdown() {
     vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
-    vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyDevice(logicalDevice, nullptr);
+    vkDestroySurfaceKHR(instance, surface, nullptr);
     
     SDL_DestroyWindow(window);
     
