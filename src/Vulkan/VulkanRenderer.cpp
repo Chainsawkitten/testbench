@@ -90,12 +90,17 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 
 int VulkanRenderer::shutdown() {
     vkDestroyDevice(logicalDevice, nullptr);
-
+    
     SDL_DestroyWindow(window);
     
+#ifndef NDEBUG
+    auto DestroyDebugReportCallback = (PFN_vkDestroyDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+    if (DestroyDebugReportCallback != nullptr)
+        DestroyDebugReportCallback(instance, callback, nullptr);
+#endif
+    
     vkDestroyInstance(instance, nullptr);
-
-
+    
     return 0;
 }
 
