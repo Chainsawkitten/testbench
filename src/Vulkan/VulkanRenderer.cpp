@@ -118,7 +118,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 }
 
 int VulkanRenderer::shutdown() {
-    vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
+    //vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr); -- Uncommenting this causes segmentation fault.
     vkDestroyDevice(logicalDevice, nullptr);
     vkDestroySurfaceKHR(instance, surface, nullptr);
     
