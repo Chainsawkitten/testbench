@@ -18,6 +18,14 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
+#ifndef NDEBUG
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj, size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData) {
+    std::cerr << "Validation layer: " << msg << std::endl;
+    
+    return VK_FALSE;
+}
+#endif
+
 VulkanRenderer::VulkanRenderer() {
     
 }
@@ -66,27 +74,8 @@ RenderState* VulkanRenderer::makeRenderState() {
 
 int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create Vulkan instance.
-    VkApplicationInfo appInfo = {};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Vulkan Testbench";
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "No Engine";
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
-    
-    const char* extensionNames[] = { VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
-    
-    VkInstanceCreateInfo instanceCreateInfo = {};
-    instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instanceCreateInfo.pApplicationInfo = &appInfo;
-    instanceCreateInfo.enabledExtensionCount = 1;
-    instanceCreateInfo.ppEnabledExtensionNames = extensionNames;
-    instanceCreateInfo.enabledLayerCount = 0;
-    
-    if (vkCreateInstance(&instanceCreateInfo, nullptr, &instance) != VK_SUCCESS) {
-        std::cout << "Failed to create instance." << std::endl;
-        exit(-1);
-    }
+    createInstance();
+    setupDebugCallback();
     
     // Init SDL.
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -96,80 +85,10 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     
     // Create window.
     window = SDL_CreateWindow("Vulkan", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
-
-    uint32_t deviceCount = 0;
-
-    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
-
-    if(deviceCount == 0)
-        std::cout << "Failed to find GPU's with Vulkan support." << std::endl;
-
-    std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
-
-    for(const auto& device : devices){
-        VkPhysicalDeviceProperties deviceProperties;
-        VkPhysicalDeviceFeatures deviceFeatures;
-        vkGetPhysicalDeviceProperties(device, &deviceProperties);
-        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
-        //Checking for discrete (dedicated) GPU.
-        //TODO: Check for actually necessary GPU features.
-        //Maybe: Wrap this in a function that takes as argument the things we are looking for.
-        if(deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
-            std::cout << "Found suitable GPU." << std::endl;
-            physicalDevice = device;
-            break;
-        }
-    }
-
-    if(physicalDevice == VK_NULL_HANDLE)
-        std::cout << "Failed to find suitable GPU's." << std::endl;
-
-    int graphicsFamily = -1;
-    uint32_t queueFamilyCount = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
-
-    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
-
-    //Check for available queue families.
-    int i = 0;
-    for(const auto& queueFamily : queueFamilies){
-        if(queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-            graphicsFamily = i;
-
-        if(graphicsFamily >= 0)
-            break;
-        i++;
-    }
-
-    std::cout << "Found " << queueFamilyCount << " queue families." << std::endl;
-
-    VkDeviceQueueCreateInfo queueCreateInfo = {};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = graphicsFamily;
-    queueCreateInfo.queueCount = 1;
-
-    //Queue priority between 0.0f - 1.0f
-    float queuePriority = 1.0f;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
-
-    //Device features.
-    VkPhysicalDeviceFeatures deviceFeatures = {};
-
-    VkDeviceCreateInfo deviceCreateInfo = {};
-    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
-    deviceCreateInfo.queueCreateInfoCount = 1;
-    deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-
-    if(vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
-        std::cout << "Could not create logical device." << std::endl;
-    else
-        std::cout << "Logical device created." << std::endl;
-    vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
-
+    
+    // Create logical device.
+    createDevice();
+    
     //Todo: move into private.
     VkSurfaceKHR surface;
 
@@ -181,19 +100,24 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     win32SurfaceCreateInfo.hinstance = wmInfo.info.win.hinstance;
 
     vkCreateWin32SurfaceKHR(instance, &win32SurfaceCreateInfo, nullptr, nullptr);
-
+    
     UNIMPLEMENTED
     return -1;
 }
 
 int VulkanRenderer::shutdown() {
     vkDestroyDevice(logicalDevice, nullptr);
-
+    
     SDL_DestroyWindow(window);
     
+#ifndef NDEBUG
+    auto DestroyDebugReportCallback = (PFN_vkDestroyDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+    if (DestroyDebugReportCallback != nullptr)
+        DestroyDebugReportCallback(instance, callback, nullptr);
+#endif
+    
     vkDestroyInstance(instance, nullptr);
-
-
+    
     return 0;
 }
 
@@ -219,4 +143,130 @@ void VulkanRenderer::frame() {
 
 void VulkanRenderer::present() {
     UNIMPLEMENTED
+}
+
+void VulkanRenderer::createInstance() {
+    VkApplicationInfo appInfo = {};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "Vulkan Testbench";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "No Engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+    
+    std::vector<const char*> extensions;
+    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+    
+    std::vector<const char*> validationLayers;
+#ifndef NDEBUG
+    extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    validationLayers.push_back("VK_LAYER_LUNARG_standard_validation");
+#endif
+    
+    VkInstanceCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
+    createInfo.enabledExtensionCount = extensions.size();
+    createInfo.ppEnabledExtensionNames = extensions.data();
+    createInfo.enabledLayerCount = validationLayers.size();
+    createInfo.ppEnabledLayerNames = validationLayers.data();
+    
+    if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+        std::cerr << "Failed to create instance." << std::endl;
+        exit(-1);
+    }
+}
+
+void VulkanRenderer::setupDebugCallback() {
+#ifndef NDEBUG
+    VkDebugReportCallbackCreateInfoEXT createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+    createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+    createInfo.pfnCallback = debugCallback;
+    
+    auto CreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+    if (CreateDebugReportCallbackEXT == nullptr)
+        std::cerr << "Failed to get CreateDebugReportCallbackEXT function" << std::endl;
+    
+    if (CreateDebugReportCallbackEXT(instance, &createInfo, nullptr, &callback) != VK_SUCCESS)
+        std::cerr << "Failed to set up debug callback" << std::endl;
+#endif
+}
+
+void VulkanRenderer::createDevice() {
+    uint32_t deviceCount = 0;
+    
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+    
+    if (deviceCount == 0) {
+        std::cerr << "Failed to find GPU with Vulkan support." << std::endl;
+        exit(-1);
+    }
+    
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+    
+    for (const auto& device : devices){
+        VkPhysicalDeviceProperties deviceProperties;
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceProperties(device, &deviceProperties);
+        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+        // Checking for discrete (dedicated) GPU.
+        // TODO: Check for actually necessary GPU features.
+        // Maybe: Wrap this in a function that takes as argument the things we are looking for.
+        if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
+            std::cout << "Found suitable GPU." << std::endl;
+            physicalDevice = device;
+            break;
+        }
+    }
+    
+    if (physicalDevice == VK_NULL_HANDLE)
+        std::cerr << "Failed to find suitable GPU's." << std::endl;
+    
+    int graphicsFamily = -1;
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+    
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+    
+    // Check for available queue families.
+    int i = 0;
+    for (const VkQueueFamilyProperties& queueFamily : queueFamilies){
+        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            graphicsFamily = i;
+        
+        if (graphicsFamily >= 0)
+            break;
+        ++i;
+    }
+    
+    std::cout << "Found " << queueFamilyCount << " queue families." << std::endl;
+    
+    VkDeviceQueueCreateInfo queueCreateInfo = {};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = graphicsFamily;
+    queueCreateInfo.queueCount = 1;
+
+    // Queue priority between 0.0f - 1.0f
+    float queuePriority = 1.0f;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+    
+    // Device features.
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+    
+    VkDeviceCreateInfo deviceCreateInfo = {};
+    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+    
+    if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
+        std::cerr << "Could not create logical device." << std::endl;
+    else
+        std::cout << "Logical device created." << std::endl;
+    vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
 }
