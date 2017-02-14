@@ -363,8 +363,7 @@ void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, width, height);
     
-    /// @todo Choose image count based on swap chain support.
-    uint32_t imageCount = 2;
+    uint32_t imageCount = swapChainSupport.capabilities.minImageCount;
     
     VkSwapchainCreateInfoKHR swapChainCreateInfo = {};
     swapChainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
