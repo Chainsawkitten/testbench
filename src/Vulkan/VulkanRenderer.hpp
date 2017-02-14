@@ -47,4 +47,5 @@ class VulkanRenderer : public Renderer {
         VkQueue graphicsQueue;
         VkQueue presentQueue;
         VkSurfaceKHR surface;
+        VkSwapchainKHR swapChain;
 };

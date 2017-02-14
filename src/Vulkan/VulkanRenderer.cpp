@@ -111,6 +111,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 }
 
 int VulkanRenderer::shutdown() {
+    vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
     vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyDevice(logicalDevice, nullptr);
     
@@ -336,4 +337,9 @@ void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
     swapChainCreateInfo.presentMode = presentMode;
     swapChainCreateInfo.clipped = VK_TRUE;
     swapChainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+    
+    if (vkCreateSwapchainKHR(logicalDevice, &swapChainCreateInfo, nullptr, &swapChain) != VK_SUCCESS) {
+        std::cerr << "Failed to create swap chain." << std::endl;
+        exit(-1);
+    }
 }
