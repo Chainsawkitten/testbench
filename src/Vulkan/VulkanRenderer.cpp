@@ -86,9 +86,6 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create window.
     window = SDL_CreateWindow("Vulkan", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
     
-    // Create logical device.
-    createDevice();
-    
     // Create surface to render to.
     SDL_SysWMinfo wmInfo;
     SDL_GetWindowWMInfo(window, &wmInfo);
@@ -102,6 +99,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
         std::cerr << "Failed to create surface." << std::endl;
         exit(-1);
     }
+    
+    // Create logical device.
+    createDevice();
     
     UNIMPLEMENTED
     return -1;
@@ -230,6 +230,7 @@ void VulkanRenderer::createDevice() {
         std::cerr << "Failed to find suitable GPU's." << std::endl;
     
     int graphicsFamily = -1;
+    int presentFamily = -1;
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
     
@@ -239,10 +240,17 @@ void VulkanRenderer::createDevice() {
     // Check for available queue families.
     int i = 0;
     for (const VkQueueFamilyProperties& queueFamily : queueFamilies){
-        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-            graphicsFamily = i;
+        if (queueFamily.queueCount > 0) {
+            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                graphicsFamily = i;
+            
+            VkBool32 presentSupport = false;
+            vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
+            if (presentSupport)
+                presentFamily = i;
+        }
         
-        if (graphicsFamily >= 0)
+        if (graphicsFamily >= 0 && presentFamily >= 0)
             break;
         ++i;
     }
