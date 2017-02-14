@@ -329,4 +329,7 @@ void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
     swapChainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     swapChainCreateInfo.queueFamilyIndexCount = 0;
     swapChainCreateInfo.pQueueFamilyIndices = nullptr;
+    
+    /// @todo Determine pretransform based on current transform in swap chain.
+    swapChainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 }
