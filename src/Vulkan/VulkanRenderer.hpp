@@ -44,4 +44,6 @@ class VulkanRenderer : public Renderer {
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         VkDevice logicalDevice;
         VkQueue graphicsQueue;
+        VkQueue presentQueue;
+        VkSurfaceKHR surface;
 };

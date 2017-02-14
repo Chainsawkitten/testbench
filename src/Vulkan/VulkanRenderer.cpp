@@ -1,6 +1,11 @@
+#define VK_PROTOTYPES
+#define VK_USE_PLATFORM_WIN32_KHR
+
 #include "VulkanRenderer.hpp"
 
 #include <iostream>
+#include <SDL_syswm.h>
+
 #include "ConstantBufferVulkan.hpp"
 #include "MaterialVulkan.hpp"
 #include "MeshVulkan.hpp"
@@ -81,6 +86,20 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create window.
     window = SDL_CreateWindow("Vulkan", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
     
+    // Create surface to render to.
+    SDL_SysWMinfo wmInfo;
+    SDL_GetWindowWMInfo(window, &wmInfo);
+    
+    VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo = {};
+    win32SurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    win32SurfaceCreateInfo.hwnd = wmInfo.info.win.window;
+    win32SurfaceCreateInfo.hinstance = wmInfo.info.win.hinstance;
+    
+    if (vkCreateWin32SurfaceKHR(instance, &win32SurfaceCreateInfo, nullptr, &surface) != VK_SUCCESS) {
+        std::cerr << "Failed to create surface." << std::endl;
+        exit(-1);
+    }
+    
     // Create logical device.
     createDevice();
     
@@ -89,6 +108,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 }
 
 int VulkanRenderer::shutdown() {
+    vkDestroySurfaceKHR(instance, surface, nullptr);
     vkDestroyDevice(logicalDevice, nullptr);
     
     SDL_DestroyWindow(window);
@@ -139,6 +159,7 @@ void VulkanRenderer::createInstance() {
     
     std::vector<const char*> extensions;
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
     
     std::vector<const char*> validationLayers;
 #ifndef NDEBUG
@@ -209,6 +230,7 @@ void VulkanRenderer::createDevice() {
         std::cerr << "Failed to find suitable GPU's." << std::endl;
     
     int graphicsFamily = -1;
+    int presentFamily = -1;
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
     
@@ -218,37 +240,51 @@ void VulkanRenderer::createDevice() {
     // Check for available queue families.
     int i = 0;
     for (const VkQueueFamilyProperties& queueFamily : queueFamilies){
-        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-            graphicsFamily = i;
+        if (queueFamily.queueCount > 0) {
+            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                graphicsFamily = i;
+            
+            VkBool32 presentSupport = false;
+            vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
+            if (presentSupport)
+                presentFamily = i;
+        }
         
-        if (graphicsFamily >= 0)
+        if (graphicsFamily >= 0 && presentFamily >= 0)
             break;
         ++i;
     }
     
     std::cout << "Found " << queueFamilyCount << " queue families." << std::endl;
     
-    VkDeviceQueueCreateInfo queueCreateInfo = {};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = graphicsFamily;
-    queueCreateInfo.queueCount = 1;
-
-    // Queue priority between 0.0f - 1.0f
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    std::set<int> uniqueQueueFamilies = { graphicsFamily, presentFamily };
+    
+    // Queue priority between 0-1.
     float queuePriority = 1.0f;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
+    for (int queueFamily : uniqueQueueFamilies) {
+        VkDeviceQueueCreateInfo queueCreateInfo = {};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = queueFamily;
+        queueCreateInfo.queueCount = 1;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+        queueCreateInfos.push_back(queueCreateInfo);
+    }
     
     // Device features.
     VkPhysicalDeviceFeatures deviceFeatures = {};
     
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
-    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
+    deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
     
     if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
         std::cerr << "Could not create logical device." << std::endl;
     else
         std::cout << "Logical device created." << std::endl;
+    
     vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
+    vkGetDeviceQueue(logicalDevice, presentFamily, 0, &presentQueue);
 }
