@@ -30,9 +30,16 @@ class VulkanRenderer : public Renderer {
         void present();
         
     private:
+        struct SwapChainSupport {
+            VkSurfaceCapabilitiesKHR capabilities;
+            std::vector<VkSurfaceFormatKHR> formats;
+            std::vector<VkPresentModeKHR> presentModes;
+        };
+        
         void createInstance();
         void setupDebugCallback();
         void createDevice();
+        SwapChainSupport querySwapChainSupport();
         void createSwapChain(unsigned int width, unsigned int height);
         
         SDL_Window* window;

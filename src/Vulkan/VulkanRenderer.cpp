@@ -91,15 +91,15 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     }
     
     // Create surface to render to.
-    SDL_SysWMinfo wmInfo;
-    SDL_GetWindowWMInfo(window, &wmInfo);
+    SDL_SysWMinfo windowInfo;
+    SDL_GetWindowWMInfo(window, &windowInfo);
     
-    VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo = {};
-    win32SurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-    win32SurfaceCreateInfo.hwnd = wmInfo.info.win.window;
-    win32SurfaceCreateInfo.hinstance = wmInfo.info.win.hinstance;
+    VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
+    surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    surfaceCreateInfo.hinstance = GetModuleHandle(NULL);
+    surfaceCreateInfo.hwnd = windowInfo.info.win.window;
     
-    if (vkCreateWin32SurfaceKHR(instance, &win32SurfaceCreateInfo, nullptr, &surface) != VK_SUCCESS) {
+    if (vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface) != VK_SUCCESS) {
         std::cerr << "Failed to create surface." << std::endl;
         exit(-1);
     }
@@ -107,7 +107,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create logical device.
     createDevice();
     
-    // Create swap-chain.
+    // Create swap chain.
     createSwapChain(width, height);
     
     UNIMPLEMENTED
@@ -305,8 +305,27 @@ void VulkanRenderer::createDevice() {
     vkGetDeviceQueue(logicalDevice, presentFamily, 0, &presentQueue);
 }
 
+VulkanRenderer::SwapChainSupport VulkanRenderer::querySwapChainSupport() {
+    SwapChainSupport swapChainSupport;
+    
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &swapChainSupport.capabilities);
+    
+    uint32_t formatCount;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
+    swapChainSupport.formats.resize(formatCount);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, swapChainSupport.formats.data());
+    
+    uint32_t presentModeCount;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
+    swapChainSupport.presentModes.resize(presentModeCount);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, swapChainSupport.presentModes.data());
+    
+    return swapChainSupport;
+}
+
 void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
-    /// @todo Determine swap chain support.
+    // Determine swap chain support.
+    SwapChainSupport swapChainSupport = querySwapChainSupport();
     
     /// @todo Choose surface format based on swap chain support.
     VkSurfaceFormatKHR surfaceFormat = {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
