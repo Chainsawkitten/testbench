@@ -15,7 +15,7 @@ ConstantBufferVulkan::~ConstantBufferVulkan() {
 }
 
 void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, unsigned int location) {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void ConstantBufferVulkan::bind(Material* material) {

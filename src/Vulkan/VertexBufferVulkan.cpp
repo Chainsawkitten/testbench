@@ -7,11 +7,11 @@ std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::
 }
 
 VertexBufferVulkan::VertexBufferVulkan() {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 VertexBufferVulkan::~VertexBufferVulkan() {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage) {

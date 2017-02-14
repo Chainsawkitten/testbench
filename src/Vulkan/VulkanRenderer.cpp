@@ -5,6 +5,8 @@
 
 #include <iostream>
 #include <SDL_syswm.h>
+#include <limits>
+#include <algorithm>
 
 #include "ConstantBufferVulkan.hpp"
 #include "MaterialVulkan.hpp"
@@ -138,7 +140,7 @@ void VulkanRenderer::setClearColor(float r, float g, float b, float a) {
 }
 
 void VulkanRenderer::clearBuffer(unsigned int flag) {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void VulkanRenderer::setRenderState(RenderState* ps) {
@@ -146,15 +148,15 @@ void VulkanRenderer::setRenderState(RenderState* ps) {
 }
 
 void VulkanRenderer::submit(Mesh* mesh) {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void VulkanRenderer::frame() {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void VulkanRenderer::present() {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void VulkanRenderer::createInstance() {
@@ -336,17 +338,30 @@ VkSurfaceFormatKHR VulkanRenderer::chooseSwapSurfaceFormat(const std::vector<VkS
     return availableFormats[0];
 }
 
+VkPresentModeKHR VulkanRenderer::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+    return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+VkExtent2D VulkanRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, unsigned int width, unsigned int height) {
+    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+        return capabilities.currentExtent;
+    } else {
+        VkExtent2D actualExtent = {width, height};
+        
+        actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
+        actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
+    
+        return actualExtent;
+    }
+}
+
 void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
     // Determine swap chain support.
     SwapChainSupport swapChainSupport = querySwapChainSupport();
     
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-    
-    /// @todo Choose present mode based on swap chain support.
-    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-    
-    /// @todo Choose extent based on swap chain support.
-    VkExtent2D extent = {width, height};
+    VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, width, height);
     
     /// @todo Choose image count based on swap chain support.
     uint32_t imageCount = 2;
