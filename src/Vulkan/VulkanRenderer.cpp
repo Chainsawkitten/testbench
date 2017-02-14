@@ -92,12 +92,16 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create surface to render to.
     SDL_SysWMinfo wmInfo;
     SDL_GetWindowWMInfo(window, &wmInfo);
-    VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo;
+    
+    VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo = {};
     win32SurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
     win32SurfaceCreateInfo.hwnd = wmInfo.info.win.window;
     win32SurfaceCreateInfo.hinstance = wmInfo.info.win.hinstance;
-
-    vkCreateWin32SurfaceKHR(instance, &win32SurfaceCreateInfo, nullptr, nullptr);
+    
+    if (vkCreateWin32SurfaceKHR(instance, &win32SurfaceCreateInfo, nullptr, &surface) != VK_SUCCESS) {
+        std::cerr << "Failed to create surface." << std::endl;
+        exit(-1);
+    }
     
     UNIMPLEMENTED
     return -1;
