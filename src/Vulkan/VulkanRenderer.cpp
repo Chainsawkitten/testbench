@@ -217,7 +217,7 @@ void VulkanRenderer::createDevice() {
         vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
         // Checking for discrete (dedicated) GPU.
-        // TODO: Check for actually necessary GPU features.
+        /// @todo Check for actually necessary GPU features.
         // Maybe: Wrap this in a function that takes as argument the things we are looking for.
         if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
             std::cout << "Found suitable GPU." << std::endl;
@@ -271,6 +271,12 @@ void VulkanRenderer::createDevice() {
         queueCreateInfos.push_back(queueCreateInfo);
     }
     
+    // Device extensions.
+    std::vector<const char*> deviceExtensions;
+    deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    
+    /// @todo Check if the extensions are actually supported.
+    
     // Device features.
     VkPhysicalDeviceFeatures deviceFeatures = {};
     
@@ -279,6 +285,8 @@ void VulkanRenderer::createDevice() {
     deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
     deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+    deviceCreateInfo.enabledExtensionCount = deviceExtensions.size();
+    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
     
     if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
         std::cerr << "Could not create logical device." << std::endl;
