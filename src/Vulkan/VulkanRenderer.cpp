@@ -103,6 +103,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create logical device.
     createDevice();
     
+    // Create swap-chain.
+    createSwapChain(width, height);
+    
     UNIMPLEMENTED
     return -1;
 }
@@ -295,4 +298,30 @@ void VulkanRenderer::createDevice() {
     
     vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
     vkGetDeviceQueue(logicalDevice, presentFamily, 0, &presentQueue);
+}
+
+void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
+    /// @todo Determine swap chain support.
+    
+    /// @todo Choose surface format based on swap chain support.
+    VkSurfaceFormatKHR surfaceFormat = {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+    
+    /// @todo Choose present mode based on swap chain support.
+    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    
+    /// @todo Choose extent based on swap chain support.
+    VkExtent2D extent = {width, height};
+    
+    /// @todo Choose image count based on swap chain support.
+    uint32_t imageCount = 2;
+    
+    VkSwapchainCreateInfoKHR swapChainCreateInfo = {};
+    swapChainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    swapChainCreateInfo.surface = surface;
+    swapChainCreateInfo.minImageCount = imageCount;
+    swapChainCreateInfo.imageFormat = surfaceFormat.format;
+    swapChainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
+    swapChainCreateInfo.imageExtent = extent;
+    swapChainCreateInfo.imageArrayLayers = 1;
+    swapChainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 }

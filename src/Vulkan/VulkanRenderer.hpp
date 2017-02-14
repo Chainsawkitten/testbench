@@ -33,6 +33,7 @@ class VulkanRenderer : public Renderer {
         void createInstance();
         void setupDebugCallback();
         void createDevice();
+        void createSwapChain(unsigned int width, unsigned int height);
         
         SDL_Window* window;
         
