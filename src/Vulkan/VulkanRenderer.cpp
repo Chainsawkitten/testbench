@@ -123,17 +123,20 @@ void VulkanRenderer::createInstance() {
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
     
-    const char* extensionNames[] = { VK_KHR_SURFACE_EXTENSION_NAME };
+    std::vector<const char*> extensions;
+    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    
     std::vector<const char*> validationLayers;
 #ifndef NDEBUG
+    extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     validationLayers.push_back("VK_LAYER_LUNARG_standard_validation");
 #endif
     
     VkInstanceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
-    createInfo.enabledExtensionCount = 1;
-    createInfo.ppEnabledExtensionNames = extensionNames;
+    createInfo.enabledExtensionCount = extensions.size();
+    createInfo.ppEnabledExtensionNames = extensions.data();
     createInfo.enabledLayerCount = validationLayers.size();
     createInfo.ppEnabledLayerNames = validationLayers.data();
     
