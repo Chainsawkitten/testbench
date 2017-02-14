@@ -324,12 +324,23 @@ VulkanRenderer::SwapChainSupport VulkanRenderer::querySwapChainSupport() {
     return swapChainSupport;
 }
 
+VkSurfaceFormatKHR VulkanRenderer::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+    if (availableFormats.size() == 1 && availableFormats[0].format == VK_FORMAT_UNDEFINED)
+        return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+    
+    for (const VkSurfaceFormatKHR& availableFormat : availableFormats) {
+        if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            return availableFormat;
+    }
+    
+    return availableFormats[0];
+}
+
 void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
     // Determine swap chain support.
     SwapChainSupport swapChainSupport = querySwapChainSupport();
     
-    /// @todo Choose surface format based on swap chain support.
-    VkSurfaceFormatKHR surfaceFormat = {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+    VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     
     /// @todo Choose present mode based on swap chain support.
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
