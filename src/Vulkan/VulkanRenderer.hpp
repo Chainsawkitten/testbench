@@ -31,11 +31,15 @@ class VulkanRenderer : public Renderer {
         
     private:
         void createInstance();
+        void setupDebugCallback();
         void createDevice();
         
         SDL_Window* window;
         
         VkInstance instance;
+#ifndef NDEBUG
+        VkDebugReportCallbackEXT callback;
+#endif
 
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         VkDevice logicalDevice;

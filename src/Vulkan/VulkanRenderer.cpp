@@ -13,6 +13,14 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
+#ifndef NDEBUG
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj, size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData) {
+    std::cerr << "Validation layer: " << msg << std::endl;
+    
+    return VK_FALSE;
+}
+#endif
+
 VulkanRenderer::VulkanRenderer() {
     
 }
@@ -62,6 +70,7 @@ RenderState* VulkanRenderer::makeRenderState() {
 int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create Vulkan instance.
     createInstance();
+    setupDebugCallback();
     
     // Init SDL.
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -141,9 +150,25 @@ void VulkanRenderer::createInstance() {
     createInfo.ppEnabledLayerNames = validationLayers.data();
     
     if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-        std::cout << "Failed to create instance." << std::endl;
+        std::cerr << "Failed to create instance." << std::endl;
         exit(-1);
     }
+}
+
+void VulkanRenderer::setupDebugCallback() {
+#ifndef NDEBUG
+    VkDebugReportCallbackCreateInfoEXT createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+    createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+    createInfo.pfnCallback = debugCallback;
+    
+    auto CreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+    if (CreateDebugReportCallbackEXT == nullptr)
+        std::cerr << "Failed to get CreateDebugReportCallbackEXT function" << std::endl;
+    
+    if (CreateDebugReportCallbackEXT(instance, &createInfo, nullptr, &callback) != VK_SUCCESS)
+        std::cerr << "Failed to set up debug callback" << std::endl;
+#endif
 }
 
 void VulkanRenderer::createDevice() {
@@ -152,7 +177,7 @@ void VulkanRenderer::createDevice() {
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
     
     if (deviceCount == 0) {
-        std::cout << "Failed to find GPU with Vulkan support." << std::endl;
+        std::cerr << "Failed to find GPU with Vulkan support." << std::endl;
         exit(-1);
     }
     
@@ -176,7 +201,7 @@ void VulkanRenderer::createDevice() {
     }
     
     if (physicalDevice == VK_NULL_HANDLE)
-        std::cout << "Failed to find suitable GPU's." << std::endl;
+        std::cerr << "Failed to find suitable GPU's." << std::endl;
     
     int graphicsFamily = -1;
     uint32_t queueFamilyCount = 0;
@@ -217,7 +242,7 @@ void VulkanRenderer::createDevice() {
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
     
     if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
-        std::cout << "Could not create logical device." << std::endl;
+        std::cerr << "Could not create logical device." << std::endl;
     else
         std::cout << "Logical device created." << std::endl;
     vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
