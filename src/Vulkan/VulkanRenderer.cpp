@@ -257,27 +257,34 @@ void VulkanRenderer::createDevice() {
     
     std::cout << "Found " << queueFamilyCount << " queue families." << std::endl;
     
-    VkDeviceQueueCreateInfo queueCreateInfo = {};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = graphicsFamily;
-    queueCreateInfo.queueCount = 1;
-
-    // Queue priority between 0.0f - 1.0f
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    std::set<int> uniqueQueueFamilies = { graphicsFamily, presentFamily };
+    
+    // Queue priority between 0-1.
     float queuePriority = 1.0f;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
+    for (int queueFamily : uniqueQueueFamilies) {
+        VkDeviceQueueCreateInfo queueCreateInfo = {};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = queueFamily;
+        queueCreateInfo.queueCount = 1;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+        queueCreateInfos.push_back(queueCreateInfo);
+    }
     
     // Device features.
     VkPhysicalDeviceFeatures deviceFeatures = {};
     
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
-    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
+    deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
     
     if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
         std::cerr << "Could not create logical device." << std::endl;
     else
         std::cout << "Logical device created." << std::endl;
+    
     vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
+    vkGetDeviceQueue(logicalDevice, presentFamily, 0, &presentQueue);
 }
