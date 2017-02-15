@@ -8,10 +8,10 @@ std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::
 }
 
 MaterialVulkan::MaterialVulkan() {
-    shaderExtensions[ShaderType::VS] = ".vert";
-    shaderExtensions[ShaderType::GS] = ".geom";
-    shaderExtensions[ShaderType::PS] = ".frag";
-    shaderExtensions[ShaderType::CS] = ".comp";
+    shaderExtensions[ShaderType::VS] = "vert";
+    shaderExtensions[ShaderType::GS] = "geom";
+    shaderExtensions[ShaderType::PS] = "frag";
+    shaderExtensions[ShaderType::CS] = "comp";
 }
 
 MaterialVulkan::~MaterialVulkan() {
@@ -85,9 +85,13 @@ int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     outShaderText += shaderText;
     
     // Output to temp file.
-    std::ofstream outShaderFile("temp" + shaderExtensions[type]);
+    std::ofstream outShaderFile("temp." + shaderExtensions[type]);
     outShaderFile << outShaderText;
     outShaderFile.close();
+    
+    // Compile to SPIR-V.
+    /// @todo Don't use a system call. Seriously...
+    system(("glslangValidator.exe -V temp." + shaderExtensions[type]).c_str());
     
     UNIMPLEMENTED
     
