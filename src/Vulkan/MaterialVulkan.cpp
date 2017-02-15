@@ -75,6 +75,12 @@ int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
         return -1;
     }
     
+    // Add defines.
+    std::string outShaderText = "#version 450\n\n";
+    for (const std::string& define : shaderDefines[type])
+        outShaderText += define;
+    outShaderText += shaderText;
+    
     UNIMPLEMENTED
     
     return -1;
