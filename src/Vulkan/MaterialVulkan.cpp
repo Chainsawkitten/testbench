@@ -1,6 +1,7 @@
 #include "MaterialVulkan.hpp"
 
 #include <iostream>
+#include <fstream>
 
 #define UNIMPLEMENTED {\
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
@@ -63,6 +64,18 @@ void MaterialVulkan::addConstantBuffer(std::string name, unsigned int location) 
 }
 
 int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
+    // Read shader file into string.
+    std::ifstream shaderFile(shaderFileNames[type]);
+    std::string shaderText;
+    if (shaderFile.is_open()) {
+        shaderText = std::string((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
+        shaderFile.close();
+    } else {
+        errString = "Cannot find file: " + shaderFileNames[type];
+        return -1;
+    }
+    
     UNIMPLEMENTED
+    
     return -1;
 }
