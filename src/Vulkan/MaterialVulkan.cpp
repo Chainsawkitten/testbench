@@ -76,10 +76,15 @@ int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     }
     
     // Add defines.
-    std::string outShaderText = "#version 450\n\n";
+    std::string outShaderText = "#version 450\n#extension GL_ARB_separate_shader_objects : enable\n\n";
     for (const std::string& define : shaderDefines[type])
         outShaderText += define;
     outShaderText += shaderText;
+    
+    // Output to temp file.
+    std::ofstream outShaderFile("temp.glsl");
+    outShaderFile << outShaderText;
+    outShaderFile.close();
     
     UNIMPLEMENTED
     

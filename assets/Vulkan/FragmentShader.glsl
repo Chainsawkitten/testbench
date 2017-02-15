@@ -1,5 +1,3 @@
-#extension GL_ARB_separate_shader_objects : enable
-
 // inputs
 #ifdef NORMAL
 	layout( location = NORMAL ) in vec4 normal_in;
