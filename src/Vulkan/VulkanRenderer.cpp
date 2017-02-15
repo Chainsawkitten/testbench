@@ -66,7 +66,7 @@ VertexBuffer* VulkanRenderer::makeVertexBuffer() {
 }
 
 Material* VulkanRenderer::makeMaterial() { 
-    return new MaterialVulkan();
+    return new MaterialVulkan(logicalDevice);
 }
 
 RenderState* VulkanRenderer::makeRenderState() { 

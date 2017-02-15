@@ -1,10 +1,12 @@
 #pragma once
 
 #include "../Base/Material.hpp"
+#include <vector>
+#include <vulkan/vulkan.h>
 
 class MaterialVulkan : public Material {
     public:
-        MaterialVulkan();
+        MaterialVulkan(VkDevice device);
         ~MaterialVulkan();
         
         void setShader(const std::string& shaderFileName, ShaderType type) final;
@@ -22,8 +24,12 @@ class MaterialVulkan : public Material {
         
     private:
         int compileShader(ShaderType type, std::string& errString);
+        void createShaderModule(ShaderType type, const std::vector<char>& source);
         static std::string readFile(const std::string& filename);
+        static std::vector<char> readFile2(const std::string& filename);
         
+        VkDevice device;
         std::string shaderNames[4];
         std::map<ShaderType, std::string> shaderExtensions;
+        std::map<ShaderType, VkShaderModule> shaderModules;
 };
