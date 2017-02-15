@@ -21,5 +21,7 @@ class MaterialVulkan : public Material {
         void addConstantBuffer(std::string name, unsigned int location) final;
         
     private:
+        int compileShader(ShaderType type, std::string& errString);
+        
         std::string shaderNames[4];
 };

@@ -26,6 +26,17 @@ void MaterialVulkan::removeShader(ShaderType type) {
 }
 
 int MaterialVulkan::compileMaterial(std::string& errString) {
+    // Compile shaders.
+    if (compileShader(ShaderType::VS, errString) < 0) {
+        std::cout << errString << std::endl;
+        return -1;
+    }
+    
+    if (compileShader(ShaderType::PS, errString) < 0) {
+        std::cout << errString << std::endl;
+        return -1;
+    }
+    
     UNIMPLEMENTED
     return 0;
 }
@@ -49,4 +60,9 @@ void MaterialVulkan::updateConstantBuffer(const void* data, size_t size, unsigne
 
 void MaterialVulkan::addConstantBuffer(std::string name, unsigned int location) {
     UNIMPLEMENTED
+}
+
+int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
+    UNIMPLEMENTED
+    return -1;
 }
