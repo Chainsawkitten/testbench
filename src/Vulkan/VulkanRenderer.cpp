@@ -1,10 +1,13 @@
 #define VK_PROTOTYPES
 #define VK_USE_PLATFORM_WIN32_KHR
+#define NOMINMAX
 
 #include "VulkanRenderer.hpp"
 
 #include <iostream>
 #include <SDL_syswm.h>
+#include <limits>
+#include <algorithm>
 
 #include "ConstantBufferVulkan.hpp"
 #include "MaterialVulkan.hpp"
@@ -85,17 +88,22 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     
     // Create window.
     window = SDL_CreateWindow("Vulkan", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
+    if (window == nullptr) {
+        std::cerr << "Cound not create SDL window." << std::endl;
+        exit(-1);
+    }
     
     // Create surface to render to.
-    SDL_SysWMinfo wmInfo;
-    SDL_GetWindowWMInfo(window, &wmInfo);
+    SDL_SysWMinfo windowInfo;
+    SDL_VERSION(&windowInfo.version);
+    SDL_GetWindowWMInfo(window, &windowInfo);
     
-    VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo = {};
-    win32SurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-    win32SurfaceCreateInfo.hwnd = wmInfo.info.win.window;
-    win32SurfaceCreateInfo.hinstance = wmInfo.info.win.hinstance;
+    VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
+    surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    surfaceCreateInfo.hinstance = windowInfo.info.win.hinstance;
+    surfaceCreateInfo.hwnd = windowInfo.info.win.window;
     
-    if (vkCreateWin32SurfaceKHR(instance, &win32SurfaceCreateInfo, nullptr, &surface) != VK_SUCCESS) {
+    if (vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface) != VK_SUCCESS) {
         std::cerr << "Failed to create surface." << std::endl;
         exit(-1);
     }
@@ -103,13 +111,17 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create logical device.
     createDevice();
     
+    // Create swap chain.
+    createSwapChain(width, height);
+    
     UNIMPLEMENTED
     return -1;
 }
 
 int VulkanRenderer::shutdown() {
-    vkDestroySurfaceKHR(instance, surface, nullptr);
+    //vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr); -- Uncommenting this causes segmentation fault.
     vkDestroyDevice(logicalDevice, nullptr);
+    vkDestroySurfaceKHR(instance, surface, nullptr);
     
     SDL_DestroyWindow(window);
     
@@ -129,7 +141,7 @@ void VulkanRenderer::setClearColor(float r, float g, float b, float a) {
 }
 
 void VulkanRenderer::clearBuffer(unsigned int flag) {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void VulkanRenderer::setRenderState(RenderState* ps) {
@@ -137,15 +149,15 @@ void VulkanRenderer::setRenderState(RenderState* ps) {
 }
 
 void VulkanRenderer::submit(Mesh* mesh) {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void VulkanRenderer::frame() {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void VulkanRenderer::present() {
-    UNIMPLEMENTED
+    //UNIMPLEMENTED
 }
 
 void VulkanRenderer::createInstance() {
@@ -217,7 +229,7 @@ void VulkanRenderer::createDevice() {
         vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
         // Checking for discrete (dedicated) GPU.
-        // TODO: Check for actually necessary GPU features.
+        /// @todo Check for actually necessary GPU features.
         // Maybe: Wrap this in a function that takes as argument the things we are looking for.
         if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU){
             std::cout << "Found suitable GPU." << std::endl;
@@ -271,6 +283,12 @@ void VulkanRenderer::createDevice() {
         queueCreateInfos.push_back(queueCreateInfo);
     }
     
+    // Device extensions.
+    std::vector<const char*> deviceExtensions;
+    deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    
+    /// @todo Check if the extensions are actually supported.
+    
     // Device features.
     VkPhysicalDeviceFeatures deviceFeatures = {};
     
@@ -279,6 +297,8 @@ void VulkanRenderer::createDevice() {
     deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
     deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+    deviceCreateInfo.enabledExtensionCount = deviceExtensions.size();
+    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
     
     if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
         std::cerr << "Could not create logical device." << std::endl;
@@ -287,4 +307,93 @@ void VulkanRenderer::createDevice() {
     
     vkGetDeviceQueue(logicalDevice, graphicsFamily, 0, &graphicsQueue);
     vkGetDeviceQueue(logicalDevice, presentFamily, 0, &presentQueue);
+}
+
+VulkanRenderer::SwapChainSupport VulkanRenderer::querySwapChainSupport() {
+    SwapChainSupport swapChainSupport;
+    
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &swapChainSupport.capabilities);
+    
+    uint32_t formatCount;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
+    swapChainSupport.formats.resize(formatCount);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, swapChainSupport.formats.data());
+    
+    uint32_t presentModeCount;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
+    swapChainSupport.presentModes.resize(presentModeCount);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, swapChainSupport.presentModes.data());
+    
+    return swapChainSupport;
+}
+
+VkSurfaceFormatKHR VulkanRenderer::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+    if (availableFormats.size() == 1 && availableFormats[0].format == VK_FORMAT_UNDEFINED)
+        return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+    
+    for (const VkSurfaceFormatKHR& availableFormat : availableFormats) {
+        if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            return availableFormat;
+    }
+    
+    return availableFormats[0];
+}
+
+VkPresentModeKHR VulkanRenderer::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+    return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+VkExtent2D VulkanRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, unsigned int width, unsigned int height) {
+    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+        return capabilities.currentExtent;
+    } else {
+        VkExtent2D actualExtent = {width, height};
+        
+        actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
+        actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
+    
+        return actualExtent;
+    }
+}
+
+void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
+    // Determine swap chain support.
+    SwapChainSupport swapChainSupport = querySwapChainSupport();
+    
+    VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+    VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, width, height);
+    
+    uint32_t imageCount = swapChainSupport.capabilities.minImageCount;
+    
+    VkSwapchainCreateInfoKHR swapChainCreateInfo = {};
+    swapChainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    swapChainCreateInfo.surface = surface;
+    swapChainCreateInfo.minImageCount = imageCount;
+    swapChainCreateInfo.imageFormat = surfaceFormat.format;
+    swapChainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
+    swapChainCreateInfo.imageExtent = extent;
+    swapChainCreateInfo.imageArrayLayers = 1;
+    swapChainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    
+    /// @todo Handle case where graphics queue is not the same as the present queue.
+    swapChainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    swapChainCreateInfo.queueFamilyIndexCount = 0;
+    swapChainCreateInfo.pQueueFamilyIndices = nullptr;
+    
+    swapChainCreateInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+    swapChainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    swapChainCreateInfo.presentMode = presentMode;
+    swapChainCreateInfo.clipped = VK_TRUE;
+    swapChainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+    
+    if (vkCreateSwapchainKHR(logicalDevice, &swapChainCreateInfo, nullptr, &swapChain) != VK_SUCCESS) {
+        std::cerr << "Failed to create swap chain." << std::endl;
+        exit(-1);
+    }
+    
+    // Get swap chain images.
+    vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, nullptr);
+    swapChainImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, swapChainImages.data());
 }
