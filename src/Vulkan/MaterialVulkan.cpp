@@ -68,15 +68,7 @@ void MaterialVulkan::addConstantBuffer(std::string name, unsigned int location) 
 
 int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     // Read shader file into string.
-    std::ifstream shaderFile(shaderFileNames[type]);
-    std::string shaderText;
-    if (shaderFile.is_open()) {
-        shaderText = std::string((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
-        shaderFile.close();
-    } else {
-        errString = "Cannot find file: " + shaderFileNames[type];
-        return -1;
-    }
+    std::string shaderText = readFile(shaderFileNames[type]);
     
     // Add defines.
     std::string outShaderText = "#version 450\n#extension GL_ARB_separate_shader_objects : enable\n\n";
@@ -96,4 +88,18 @@ int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     UNIMPLEMENTED
     
     return -1;
+}
+
+std::string MaterialVulkan::readFile(const std::string& filename) {
+    std::ifstream shaderFile(filename);
+    std::string text;
+    if (shaderFile.is_open()) {
+        text = std::string((std::istreambuf_iterator<char>(shaderFile)), std::istreambuf_iterator<char>());
+        shaderFile.close();
+    } else {
+        std::cerr << "Cannot find file: " << filename << std::endl;
+        exit(-1);
+    }
+    
+    return text;
 }
