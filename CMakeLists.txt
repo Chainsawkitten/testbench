@@ -60,6 +60,8 @@ set(ASSETS
         assets/textures/fatboy.png
         assets/GL45/FragmentShader.glsl
         assets/GL45/VertexShader.glsl
+        assets/Vulkan/FragmentShader.glsl
+        assets/Vulkan/VertexShader.glsl
     )
 
 add_custom_target(AssetTarget ALL)
