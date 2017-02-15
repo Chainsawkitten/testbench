@@ -29,12 +29,12 @@ layout(binding=DIFFUSE_TINT) uniform DIFFUSE_TINT_NAME
 void main() {
 
 	#ifdef NORMAL
-		normal_out = normal_in[gl_VertexID];
+		normal_out = normal_in[gl_VertexIndex];
 	#endif
 
 	#ifdef TEXTCOORD
-		uv_out = uv_in[gl_VertexID];
+		uv_out = uv_in[gl_VertexIndex];
 	#endif
 
-	gl_Position = position_in[gl_VertexID] + translate;
-};
+	gl_Position = position_in[gl_VertexIndex] + translate;
+}
