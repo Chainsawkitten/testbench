@@ -115,8 +115,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     VkFormat format = createSwapChain(width, height);
     createImageViews(format);
     
-    UNIMPLEMENTED
-    return -1;
+    return 0;
 }
 
 int VulkanRenderer::shutdown() {
