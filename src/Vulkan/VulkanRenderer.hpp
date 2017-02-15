@@ -44,7 +44,9 @@ class VulkanRenderer : public Renderer {
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, unsigned int width, unsigned int height);
-        void createSwapChain(unsigned int width, unsigned int height);
+        VkFormat createSwapChain(unsigned int width, unsigned int height);
+        
+        void createImageViews(VkFormat format);
         
         SDL_Window* window;
         
@@ -60,4 +62,5 @@ class VulkanRenderer : public Renderer {
         VkSurfaceKHR surface;
         VkSwapchainKHR swapChain;
         std::vector<VkImage> swapChainImages;
+        std::vector<VkImageView> swapChainImageViews;
 };
