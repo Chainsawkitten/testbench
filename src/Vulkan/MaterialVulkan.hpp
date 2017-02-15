@@ -24,4 +24,5 @@ class MaterialVulkan : public Material {
         int compileShader(ShaderType type, std::string& errString);
         
         std::string shaderNames[4];
+        std::map<ShaderType, std::string> shaderExtensions;
 };

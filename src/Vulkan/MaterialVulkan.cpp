@@ -8,7 +8,10 @@ std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::
 }
 
 MaterialVulkan::MaterialVulkan() {
-    UNIMPLEMENTED
+    shaderExtensions[ShaderType::VS] = ".vert";
+    shaderExtensions[ShaderType::GS] = ".geom";
+    shaderExtensions[ShaderType::PS] = ".frag";
+    shaderExtensions[ShaderType::CS] = ".comp";
 }
 
 MaterialVulkan::~MaterialVulkan() {
@@ -82,7 +85,7 @@ int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     outShaderText += shaderText;
     
     // Output to temp file.
-    std::ofstream outShaderFile("temp.glsl");
+    std::ofstream outShaderFile("temp" + shaderExtensions[type]);
     outShaderFile << outShaderText;
     outShaderFile.close();
     
