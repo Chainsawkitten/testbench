@@ -85,6 +85,9 @@ int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     /// @todo Don't use a system call. Seriously...
     system(("glslangValidator.exe -V temp." + shaderExtensions[type]).c_str());
     
+    // Read binary shader.
+    std::string binaryShader = readFile(shaderExtensions[type] + ".spv");
+    
     UNIMPLEMENTED
     
     return -1;

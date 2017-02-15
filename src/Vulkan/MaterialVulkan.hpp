@@ -22,7 +22,7 @@ class MaterialVulkan : public Material {
         
     private:
         int compileShader(ShaderType type, std::string& errString);
-        std::string readFile(const std::string& filename);
+        static std::string readFile(const std::string& filename);
         
         std::string shaderNames[4];
         std::map<ShaderType, std::string> shaderExtensions;
