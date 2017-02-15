@@ -19,4 +19,7 @@ class MaterialVulkan : public Material {
         
         // slower version using a string
         void addConstantBuffer(std::string name, unsigned int location) final;
+        
+    private:
+        std::string shaderNames[4];
 };

@@ -15,7 +15,10 @@ MaterialVulkan::~MaterialVulkan() {
 }
 
 void MaterialVulkan::setShader(const std::string& shaderFileName, ShaderType type) {
-    UNIMPLEMENTED
+    if (shaderFileNames.find(type) != shaderFileNames.end())
+        removeShader(type);
+    
+    shaderFileNames[type] = shaderFileName;
 }
 
 void MaterialVulkan::removeShader(ShaderType type) {
