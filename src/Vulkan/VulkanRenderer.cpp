@@ -58,8 +58,7 @@ std::string VulkanRenderer::getShaderPath() {
 }
 
 std::string VulkanRenderer::getShaderExtension() {
-    UNIMPLEMENTED
-    return "";
+    return ".glsl";
 }
 
 VertexBuffer* VulkanRenderer::makeVertexBuffer() { 
