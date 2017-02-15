@@ -54,8 +54,7 @@ ConstantBuffer* VulkanRenderer::makeConstantBuffer(std::string name, unsigned in
 }
 
 std::string VulkanRenderer::getShaderPath() {
-    UNIMPLEMENTED
-    return "";
+    return "assets/Vulkan/";
 }
 
 std::string VulkanRenderer::getShaderExtension() {
