@@ -112,13 +112,17 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     createDevice();
     
     // Create swap chain.
-    createSwapChain(width, height);
+    VkFormat format = createSwapChain(width, height);
+    createImageViews(format);
     
     UNIMPLEMENTED
     return -1;
 }
 
 int VulkanRenderer::shutdown() {
+    for (VkImageView& imageView : swapChainImageViews)
+        vkDestroyImageView(logicalDevice, imageView, nullptr);
+    
     //vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr); -- Uncommenting this causes segmentation fault.
     vkDestroyDevice(logicalDevice, nullptr);
     vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -356,7 +360,7 @@ VkExtent2D VulkanRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capa
     }
 }
 
-void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
+VkFormat VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
     // Determine swap chain support.
     SwapChainSupport swapChainSupport = querySwapChainSupport();
     
@@ -396,4 +400,32 @@ void VulkanRenderer::createSwapChain(unsigned int width, unsigned int height) {
     vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
     vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, swapChainImages.data());
+    
+    return surfaceFormat.format;
+}
+
+void VulkanRenderer::createImageViews(VkFormat format) {
+    swapChainImageViews.resize(swapChainImages.size());
+    
+    for (uint32_t i = 0; i < swapChainImages.size(); ++i) {
+        VkImageViewCreateInfo imageViewCreateInfo = {};
+        imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        imageViewCreateInfo.image = swapChainImages[i];
+        imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        imageViewCreateInfo.format = format;
+        imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+        imageViewCreateInfo.subresourceRange.levelCount = 1;
+        imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+        imageViewCreateInfo.subresourceRange.layerCount = 1;
+        
+        if (vkCreateImageView(logicalDevice, &imageViewCreateInfo, nullptr, &swapChainImageViews[i])) {
+            std::cerr << "Failed to create image views." << std::endl;
+            exit(-1);
+        }
+    }
 }
