@@ -7,9 +7,10 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
-MaterialVulkan::MaterialVulkan(VkDevice device, VkExtent2D swapChainExtent) {
+MaterialVulkan::MaterialVulkan(VkDevice device, VkExtent2D swapChainExtent, VkRenderPass renderPass) {
     this->device = device;
     this->swapChainExtent = swapChainExtent;
+    this->renderPass = renderPass;
     
     shaderExtensions[ShaderType::VS] = "vert";
     shaderExtensions[ShaderType::GS] = "geom";
@@ -23,11 +24,12 @@ MaterialVulkan::MaterialVulkan(VkDevice device, VkExtent2D swapChainExtent) {
 }
 
 MaterialVulkan::~MaterialVulkan() {
+    vkDestroyPipeline(device, graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+    
     // Clean up shader modules.
     for (auto& it : shaderModules)
         vkDestroyShaderModule(device, it.second, nullptr);
-    
-    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 }
 
 void MaterialVulkan::setShader(const std::string& shaderFileName, ShaderType type) {
@@ -132,7 +134,29 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
         return -1;
     }
     
-    UNIMPLEMENTED
+    // Create pipeline.
+    VkGraphicsPipelineCreateInfo pipelineInfo = {};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.stageCount = 2;
+    pipelineInfo.pStages = shaderStages;
+    pipelineInfo.pVertexInputState = &vertexInputInfo;
+    pipelineInfo.pInputAssemblyState = &inputAssembly;
+    pipelineInfo.pViewportState = &viewportState;
+    pipelineInfo.pRasterizationState = &rasterizer;
+    pipelineInfo.pMultisampleState = &multisampling;
+    pipelineInfo.pDepthStencilState = nullptr;
+    pipelineInfo.pColorBlendState = &colorBlending;
+    pipelineInfo.pDynamicState = nullptr;
+    pipelineInfo.layout = pipelineLayout;
+    pipelineInfo.renderPass = renderPass;
+    pipelineInfo.subpass = 0;
+    pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+    
+    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+        std::cerr << "Failed to create graphics pipeline." << std::endl;
+        return -1;
+    }
+    
     return 0;
 }
 
