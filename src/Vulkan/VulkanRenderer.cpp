@@ -119,6 +119,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create frame buffers.
     createFramebuffers();
     
+    // Create command buffers.
+    createCommandPool();
+    
     return 0;
 }
 
@@ -253,7 +256,7 @@ void VulkanRenderer::createDevice() {
     if (physicalDevice == VK_NULL_HANDLE)
         std::cerr << "Failed to find suitable GPU's." << std::endl;
     
-    int graphicsFamily = -1;
+    graphicsFamily = -1;
     int presentFamily = -1;
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
@@ -493,5 +496,17 @@ void VulkanRenderer::createFramebuffers() {
             std::cerr << "Failed to create framebuffer" << std::endl;
             exit(-1);
         }
+    }
+}
+
+void VulkanRenderer::createCommandPool() {
+    VkCommandPoolCreateInfo poolInfo = {};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.queueFamilyIndex = graphicsFamily;
+    poolInfo.flags = 0;
+    
+    if (vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
+        std::cerr << "Failed to create command pool" << std::endl;
+        exit(-1);
     }
 }
