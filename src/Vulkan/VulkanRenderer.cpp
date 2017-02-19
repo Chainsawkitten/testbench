@@ -126,6 +126,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 }
 
 int VulkanRenderer::shutdown() {
+    vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
+    
     for (VkFramebuffer& framebuffer : swapChainFramebuffers)
         vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
     
