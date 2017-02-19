@@ -47,6 +47,7 @@ class VulkanRenderer : public Renderer {
         VkFormat createSwapChain(unsigned int width, unsigned int height);
         
         void createImageViews(VkFormat format);
+        void createRenderPass(VkFormat format);
         
         SDL_Window* window;
         
@@ -64,4 +65,5 @@ class VulkanRenderer : public Renderer {
         VkExtent2D swapChainExtent;
         std::vector<VkImage> swapChainImages;
         std::vector<VkImageView> swapChainImageViews;
+        VkRenderPass renderPass;
 };
