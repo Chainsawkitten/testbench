@@ -61,6 +61,7 @@ class VulkanRenderer : public Renderer {
         VkQueue presentQueue;
         VkSurfaceKHR surface;
         VkSwapchainKHR swapChain;
+        VkExtent2D swapChainExtent;
         std::vector<VkImage> swapChainImages;
         std::vector<VkImageView> swapChainImageViews;
 };
