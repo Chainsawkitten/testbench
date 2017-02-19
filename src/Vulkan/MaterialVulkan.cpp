@@ -80,6 +80,11 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     
+    // Scissor.
+    VkRect2D scissor = {};
+    scissor.offset = {0, 0};
+    scissor.extent = swapChainExtent;
+    
     UNIMPLEMENTED
     return 0;
 }
