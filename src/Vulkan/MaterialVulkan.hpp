@@ -34,4 +34,5 @@ class MaterialVulkan : public Material {
         std::map<ShaderType, VkShaderModule> shaderModules;
         std::map<ShaderType, VkShaderStageFlagBits> shaderStageFlags;
         VkExtent2D swapChainExtent;
+        VkPipelineLayout pipelineLayout;
 };

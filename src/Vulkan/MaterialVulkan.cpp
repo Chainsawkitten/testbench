@@ -42,12 +42,12 @@ void MaterialVulkan::removeShader(ShaderType type) {
 int MaterialVulkan::compileMaterial(std::string& errString) {
     // Compile shaders.
     if (compileShader(ShaderType::VS, errString) < 0) {
-        std::cout << errString << std::endl;
+        std::cerr << errString << std::endl;
         return -1;
     }
     
     if (compileShader(ShaderType::PS, errString) < 0) {
-        std::cout << errString << std::endl;
+        std::cerr << errString << std::endl;
         return -1;
     }
     
@@ -120,6 +120,15 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.attachmentCount = 1;
     colorBlending.pAttachments = &colorBlendAttachment;
+    
+    // Pipeline layout.
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    
+    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+        std::cerr << "Failed to create pipeline layout." << std::endl;
+        return -1;
+    }
     
     UNIMPLEMENTED
     return 0;
