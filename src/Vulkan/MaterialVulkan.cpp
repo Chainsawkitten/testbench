@@ -7,8 +7,10 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
-MaterialVulkan::MaterialVulkan(VkDevice device) {
+MaterialVulkan::MaterialVulkan(VkDevice device, VkExtent2D swapChainExtent) {
     this->device = device;
+    this->swapChainExtent = swapChainExtent;
+    
     shaderExtensions[ShaderType::VS] = "vert";
     shaderExtensions[ShaderType::GS] = "geom";
     shaderExtensions[ShaderType::PS] = "frag";
@@ -68,6 +70,15 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     inputAssembly.primitiveRestartEnable = VK_FALSE;
+    
+    // Viewport.
+    VkViewport viewport = {};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = swapChainExtent.width;
+    viewport.height = swapChainExtent.height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
     
     UNIMPLEMENTED
     return 0;

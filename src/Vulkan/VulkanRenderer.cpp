@@ -66,7 +66,7 @@ VertexBuffer* VulkanRenderer::makeVertexBuffer() {
 }
 
 Material* VulkanRenderer::makeMaterial() { 
-    return new MaterialVulkan(logicalDevice);
+    return new MaterialVulkan(logicalDevice, swapChainExtent);
 }
 
 RenderState* VulkanRenderer::makeRenderState() { 
@@ -363,7 +363,7 @@ VkFormat VulkanRenderer::createSwapChain(unsigned int width, unsigned int height
     
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, width, height);
+    swapChainExtent = chooseSwapExtent(swapChainSupport.capabilities, width, height);
     
     uint32_t imageCount = swapChainSupport.capabilities.minImageCount;
     
@@ -373,7 +373,7 @@ VkFormat VulkanRenderer::createSwapChain(unsigned int width, unsigned int height
     swapChainCreateInfo.minImageCount = imageCount;
     swapChainCreateInfo.imageFormat = surfaceFormat.format;
     swapChainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
-    swapChainCreateInfo.imageExtent = extent;
+    swapChainCreateInfo.imageExtent = swapChainExtent;
     swapChainCreateInfo.imageArrayLayers = 1;
     swapChainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     
