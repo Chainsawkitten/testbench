@@ -47,6 +47,7 @@ class VulkanRenderer : public Renderer {
         VkFormat createSwapChain(unsigned int width, unsigned int height);
         
         void createImageViews(VkFormat format);
+        void createRenderPass(VkFormat format);
         
         SDL_Window* window;
         

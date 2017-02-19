@@ -113,6 +113,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     VkFormat format = createSwapChain(width, height);
     createImageViews(format);
     
+    // Create render pass.
+    createRenderPass(format);
+    
     return 0;
 }
 
@@ -425,4 +428,17 @@ void VulkanRenderer::createImageViews(VkFormat format) {
             exit(-1);
         }
     }
+}
+
+void VulkanRenderer::createRenderPass(VkFormat format) {
+    // We use a single color buffer.
+    VkAttachmentDescription colorAttachment = {};
+    colorAttachment.format = format;
+    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 }
