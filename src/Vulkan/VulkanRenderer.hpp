@@ -48,6 +48,7 @@ class VulkanRenderer : public Renderer {
         
         void createImageViews(VkFormat format);
         void createRenderPass(VkFormat format);
+        void createFramebuffers();
         
         SDL_Window* window;
         
@@ -66,4 +67,5 @@ class VulkanRenderer : public Renderer {
         std::vector<VkImage> swapChainImages;
         std::vector<VkImageView> swapChainImageViews;
         VkRenderPass renderPass;
+        std::vector<VkFramebuffer> swapChainFramebuffers;
 };
