@@ -65,4 +65,5 @@ class VulkanRenderer : public Renderer {
         VkExtent2D swapChainExtent;
         std::vector<VkImage> swapChainImages;
         std::vector<VkImageView> swapChainImageViews;
+        VkRenderPass renderPass;
 };
