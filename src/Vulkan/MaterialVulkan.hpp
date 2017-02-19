@@ -6,7 +6,7 @@
 
 class MaterialVulkan : public Material {
     public:
-        MaterialVulkan(VkDevice device, VkExtent2D swapChainExtent);
+        MaterialVulkan(VkDevice device, VkExtent2D swapChainExtent, VkRenderPass renderPass);
         ~MaterialVulkan();
         
         void setShader(const std::string& shaderFileName, ShaderType type) final;
@@ -34,5 +34,7 @@ class MaterialVulkan : public Material {
         std::map<ShaderType, VkShaderModule> shaderModules;
         std::map<ShaderType, VkShaderStageFlagBits> shaderStageFlags;
         VkExtent2D swapChainExtent;
+        VkRenderPass renderPass;
         VkPipelineLayout pipelineLayout;
+        VkPipeline graphicsPipeline;
 };
