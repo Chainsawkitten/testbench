@@ -54,13 +54,11 @@ ConstantBuffer* VulkanRenderer::makeConstantBuffer(std::string name, unsigned in
 }
 
 std::string VulkanRenderer::getShaderPath() {
-    UNIMPLEMENTED
-    return "";
+    return "assets/Vulkan/";
 }
 
 std::string VulkanRenderer::getShaderExtension() {
-    UNIMPLEMENTED
-    return "";
+    return ".glsl";
 }
 
 VertexBuffer* VulkanRenderer::makeVertexBuffer() { 
@@ -68,7 +66,7 @@ VertexBuffer* VulkanRenderer::makeVertexBuffer() {
 }
 
 Material* VulkanRenderer::makeMaterial() { 
-    return new MaterialVulkan();
+    return new MaterialVulkan(logicalDevice);
 }
 
 RenderState* VulkanRenderer::makeRenderState() { 
@@ -115,8 +113,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     VkFormat format = createSwapChain(width, height);
     createImageViews(format);
     
-    UNIMPLEMENTED
-    return -1;
+    return 0;
 }
 
 int VulkanRenderer::shutdown() {
