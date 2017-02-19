@@ -26,6 +26,8 @@ MaterialVulkan::~MaterialVulkan() {
     // Clean up shader modules.
     for (auto& it : shaderModules)
         vkDestroyShaderModule(device, it.second, nullptr);
+    
+    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 }
 
 void MaterialVulkan::setShader(const std::string& shaderFileName, ShaderType type) {
