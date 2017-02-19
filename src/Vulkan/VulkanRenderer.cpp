@@ -120,6 +120,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 }
 
 int VulkanRenderer::shutdown() {
+    vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
+    
     for (VkImageView& imageView : swapChainImageViews)
         vkDestroyImageView(logicalDevice, imageView, nullptr);
     
