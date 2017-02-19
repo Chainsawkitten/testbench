@@ -16,9 +16,9 @@ MaterialVulkan::MaterialVulkan(VkDevice device) {
 }
 
 MaterialVulkan::~MaterialVulkan() {
-    /// @todo Clean up shader modules.
-    
-    UNIMPLEMENTED
+    // Clean up shader modules.
+    for (auto& it : shaderModules)
+        vkDestroyShaderModule(device, it.second, nullptr);
 }
 
 void MaterialVulkan::setShader(const std::string& shaderFileName, ShaderType type) {
