@@ -13,6 +13,11 @@ MaterialVulkan::MaterialVulkan(VkDevice device) {
     shaderExtensions[ShaderType::GS] = "geom";
     shaderExtensions[ShaderType::PS] = "frag";
     shaderExtensions[ShaderType::CS] = "comp";
+    
+    shaderStageFlags[ShaderType::VS] = VK_SHADER_STAGE_VERTEX_BIT;
+    shaderStageFlags[ShaderType::GS] = VK_SHADER_STAGE_GEOMETRY_BIT;
+    shaderStageFlags[ShaderType::PS] = VK_SHADER_STAGE_FRAGMENT_BIT;
+    shaderStageFlags[ShaderType::CS] = VK_SHADER_STAGE_COMPUTE_BIT;
 }
 
 MaterialVulkan::~MaterialVulkan() {
@@ -43,6 +48,12 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
         std::cout << errString << std::endl;
         return -1;
     }
+    
+    // Create shader stages.
+    VkPipelineShaderStageCreateInfo vertexShaderStageCreateInfo = createShaderStage(ShaderType::VS);
+    VkPipelineShaderStageCreateInfo fragmentShaderStageCreateInfo = createShaderStage(ShaderType::PS);
+    
+    VkPipelineShaderStageCreateInfo shaderStages[] = {vertexShaderStageCreateInfo, fragmentShaderStageCreateInfo};
     
     UNIMPLEMENTED
     return 0;
@@ -94,9 +105,7 @@ int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     // Create shader module.
     createShaderModule(type, binaryShader);
     
-    UNIMPLEMENTED
-    
-    return -1;
+    return 0;
 }
 
 void MaterialVulkan::createShaderModule(ShaderType type, const std::vector<char>& source) {
@@ -109,6 +118,16 @@ void MaterialVulkan::createShaderModule(ShaderType type, const std::vector<char>
         std::cerr << "Failed to create shader module." << std::endl;
         exit(-1);
     }
+}
+
+VkPipelineShaderStageCreateInfo MaterialVulkan::createShaderStage(ShaderType type) {
+    VkPipelineShaderStageCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    createInfo.stage = shaderStageFlags[type];
+    createInfo.module = shaderModules[type];
+    createInfo.pName = "main";
+    
+    return createInfo;
 }
 
 std::string MaterialVulkan::readFile(const std::string& filename) {

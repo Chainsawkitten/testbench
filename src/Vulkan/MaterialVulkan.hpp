@@ -25,10 +25,12 @@ class MaterialVulkan : public Material {
     private:
         int compileShader(ShaderType type, std::string& errString);
         void createShaderModule(ShaderType type, const std::vector<char>& source);
+        VkPipelineShaderStageCreateInfo createShaderStage(ShaderType type);
         static std::string readFile(const std::string& filename);
         static std::vector<char> readFile2(const std::string& filename);
         
         VkDevice device;
         std::map<ShaderType, std::string> shaderExtensions;
         std::map<ShaderType, VkShaderModule> shaderModules;
+        std::map<ShaderType, VkShaderStageFlagBits> shaderStageFlags;
 };
