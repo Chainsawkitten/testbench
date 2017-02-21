@@ -181,6 +181,10 @@ void MaterialVulkan::addConstantBuffer(std::string name, unsigned int location) 
     UNIMPLEMENTED
 }
 
+VkPipeline MaterialVulkan::getPipeline() const {
+    return graphicsPipeline;
+}
+
 int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     // Read shader file into string.
     std::string shaderText = readFile(shaderFileNames[type]);
