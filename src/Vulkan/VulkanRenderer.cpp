@@ -171,6 +171,16 @@ void VulkanRenderer::submit(Mesh* mesh) {
 }
 
 void VulkanRenderer::frame() {
+    // Start command buffer recording.
+    for (std::size_t i = 0; i < commandBuffers.size(); ++i) {
+        VkCommandBufferBeginInfo beginInfo = {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        beginInfo.pInheritanceInfo = nullptr;
+        
+        vkBeginCommandBuffer(commandBuffers[i], &beginInfo);
+    }
+    
     //UNIMPLEMENTED
 }
 
