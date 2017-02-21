@@ -123,6 +123,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     createCommandPool();
     createCommandBuffers();
     
+    // Create semaphores.
+    createSemaphores();
+
     return 0;
 }
 
@@ -453,6 +456,15 @@ VkFormat VulkanRenderer::createSwapChain(unsigned int width, unsigned int height
     vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, swapChainImages.data());
     
     return surfaceFormat.format;
+}
+
+void VulkanRenderer::createSemaphores() {
+    VkSemaphoreCreateInfo semaphoreInfo = {};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    if (   vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
+            vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS )
+        std::cout << "Couldn't create semaphores" << std::endl;
 }
 
 void VulkanRenderer::createImageViews(VkFormat format) {

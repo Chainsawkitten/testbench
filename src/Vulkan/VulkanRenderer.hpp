@@ -51,6 +51,7 @@ class VulkanRenderer : public Renderer {
         void createFramebuffers();
         void createCommandPool();
         void createCommandBuffers();
+        void createSemaphores();
         
         std::vector<Mesh*> drawList;
         
@@ -61,6 +62,8 @@ class VulkanRenderer : public Renderer {
         VkDebugReportCallbackEXT callback;
 #endif
 
+        VkSemaphore imageAvailableSemaphore;
+        VkSemaphore renderFinishedSemaphore;
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         VkDevice logicalDevice;
         int graphicsFamily;
