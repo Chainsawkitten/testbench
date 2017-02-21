@@ -50,6 +50,7 @@ class VulkanRenderer : public Renderer {
         void createRenderPass(VkFormat format);
         void createFramebuffers();
         void createCommandPool();
+        void createCommandBuffers();
         
         SDL_Window* window;
         
@@ -71,4 +72,5 @@ class VulkanRenderer : public Renderer {
         VkRenderPass renderPass;
         std::vector<VkFramebuffer> swapChainFramebuffers;
         VkCommandPool commandPool;
+        std::vector<VkCommandBuffer> commandBuffers;
 };

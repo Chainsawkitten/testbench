@@ -121,6 +121,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     
     // Create command buffers.
     createCommandPool();
+    createCommandBuffers();
     
     return 0;
 }
@@ -509,6 +510,21 @@ void VulkanRenderer::createCommandPool() {
     
     if (vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
         std::cerr << "Failed to create command pool" << std::endl;
+        exit(-1);
+    }
+}
+
+void VulkanRenderer::createCommandBuffers() {
+    commandBuffers.resize(swapChainFramebuffers.size());
+    
+    VkCommandBufferAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = commandPool;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = commandBuffers.size();
+    
+    if (vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate command buffers!" << std::endl;
         exit(-1);
     }
 }
