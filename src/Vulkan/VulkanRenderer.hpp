@@ -46,6 +46,7 @@ class VulkanRenderer : public Renderer {
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, unsigned int width, unsigned int height);
         VkFormat createSwapChain(unsigned int width, unsigned int height);
         
+        void createSemaphores();
         void createImageViews(VkFormat format);
         void createRenderPass(VkFormat format);
         void createFramebuffers();
@@ -61,6 +62,8 @@ class VulkanRenderer : public Renderer {
         VkDebugReportCallbackEXT callback;
 #endif
 
+        VkSemaphore imageAvailableSemaphore;
+        VkSemaphore renderFinishedSemaphore;
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         VkDevice logicalDevice;
         int graphicsFamily;

@@ -123,6 +123,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     createCommandPool();
     createCommandBuffers();
     
+    // Create semaphores.
+    createSemaphores();
+
     return 0;
 }
 
@@ -212,7 +215,39 @@ void VulkanRenderer::frame() {
 }
 
 void VulkanRenderer::present() {
-    //UNIMPLEMENTED
+    // Get image from swapchain.
+    uint32_t imageIndex;
+    vkAcquireNextImageKHR(logicalDevice, swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+    // Create submit info.
+    VkSubmitInfo submitInfo = {};
+    VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
+    VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+    submitInfo.commandBufferCount = commandBuffers.size();
+    submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
+
+    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
+        std::cout << "Could not submit command buffer to graphics queue." << std::endl;
+
+    // Setup presentation
+    VkPresentInfoKHR presentInfo = {};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = &swapChain;
+    presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pResults = nullptr;
+
+    // Submit presentation request.
+    vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
 void VulkanRenderer::createInstance() {
@@ -455,6 +490,15 @@ VkFormat VulkanRenderer::createSwapChain(unsigned int width, unsigned int height
     return surfaceFormat.format;
 }
 
+void VulkanRenderer::createSemaphores() {
+    VkSemaphoreCreateInfo semaphoreInfo = {};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    if (   vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
+            vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS )
+        std::cout << "Couldn't create semaphores" << std::endl;
+}
+
 void VulkanRenderer::createImageViews(VkFormat format) {
     swapChainImageViews.resize(swapChainImages.size());
     
@@ -482,6 +526,13 @@ void VulkanRenderer::createImageViews(VkFormat format) {
 }
 
 void VulkanRenderer::createRenderPass(VkFormat format) {
+
+    VkSubpassDependency dependency = {};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
     // We use a single color buffer.
     VkAttachmentDescription colorAttachment = {};
     colorAttachment.format = format;
@@ -510,6 +561,8 @@ void VulkanRenderer::createRenderPass(VkFormat format) {
     renderPassInfo.pAttachments = &colorAttachment;
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
     
     if (vkCreateRenderPass(logicalDevice, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
         std::cerr << "Failed to create render pass" << std::endl;
