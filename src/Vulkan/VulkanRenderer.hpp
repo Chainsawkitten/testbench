@@ -49,6 +49,10 @@ class VulkanRenderer : public Renderer {
         void createImageViews(VkFormat format);
         void createRenderPass(VkFormat format);
         void createFramebuffers();
+        void createCommandPool();
+        void createCommandBuffers();
+        
+        std::vector<Mesh*> drawList;
         
         SDL_Window* window;
         
@@ -59,6 +63,7 @@ class VulkanRenderer : public Renderer {
 
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         VkDevice logicalDevice;
+        int graphicsFamily;
         VkQueue graphicsQueue;
         VkQueue presentQueue;
         VkSurfaceKHR surface;
@@ -68,4 +73,7 @@ class VulkanRenderer : public Renderer {
         std::vector<VkImageView> swapChainImageViews;
         VkRenderPass renderPass;
         std::vector<VkFramebuffer> swapChainFramebuffers;
+        VkCommandPool commandPool;
+        std::vector<VkCommandBuffer> commandBuffers;
+        VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 };

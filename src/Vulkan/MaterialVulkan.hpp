@@ -22,6 +22,8 @@ class MaterialVulkan : public Material {
         // slower version using a string
         void addConstantBuffer(std::string name, unsigned int location) final;
         
+        VkPipeline getPipeline() const;
+        
     private:
         int compileShader(ShaderType type, std::string& errString);
         void createShaderModule(ShaderType type, const std::vector<char>& source);

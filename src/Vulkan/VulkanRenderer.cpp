@@ -119,10 +119,16 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create frame buffers.
     createFramebuffers();
     
+    // Create command buffers.
+    createCommandPool();
+    createCommandBuffers();
+    
     return 0;
 }
 
 int VulkanRenderer::shutdown() {
+    vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
+    
     for (VkFramebuffer& framebuffer : swapChainFramebuffers)
         vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
     
@@ -149,7 +155,7 @@ int VulkanRenderer::shutdown() {
 }
 
 void VulkanRenderer::setClearColor(float r, float g, float b, float a) {
-    UNIMPLEMENTED
+    clearColor = {r, g, b, a};
 }
 
 void VulkanRenderer::clearBuffer(unsigned int flag) {
@@ -161,11 +167,48 @@ void VulkanRenderer::setRenderState(RenderState* ps) {
 }
 
 void VulkanRenderer::submit(Mesh* mesh) {
-    //UNIMPLEMENTED
+    drawList.push_back(mesh);
 }
 
 void VulkanRenderer::frame() {
-    //UNIMPLEMENTED
+    for (std::size_t i = 0; i < commandBuffers.size(); ++i) {
+        // Start command buffer recording.
+        VkCommandBufferBeginInfo beginInfo = {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        beginInfo.pInheritanceInfo = nullptr;
+        
+        vkBeginCommandBuffer(commandBuffers[i], &beginInfo);
+        
+        // Start render pass.
+        VkRenderPassBeginInfo renderPassInfo = {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = renderPass;
+        renderPassInfo.framebuffer = swapChainFramebuffers[i];
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent = swapChainExtent;
+        renderPassInfo.clearValueCount = 1;
+        renderPassInfo.pClearValues = &clearColor;
+        
+        vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        
+        // Draw meshes.
+        for (Mesh* mesh : drawList) {
+            MaterialVulkan* material = static_cast<MaterialVulkan*>(mesh->technique->material);
+            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipeline());
+            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+        }
+        
+        // End render pass.
+        vkCmdEndRenderPass(commandBuffers[i]);
+        
+        if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+            std::cerr << "Failed to record command buffer" << std::endl;
+            exit(-1);
+        }
+    }
+    
+    drawList.clear();
 }
 
 void VulkanRenderer::present() {
@@ -253,7 +296,7 @@ void VulkanRenderer::createDevice() {
     if (physicalDevice == VK_NULL_HANDLE)
         std::cerr << "Failed to find suitable GPU's." << std::endl;
     
-    int graphicsFamily = -1;
+    graphicsFamily = -1;
     int presentFamily = -1;
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
@@ -493,5 +536,32 @@ void VulkanRenderer::createFramebuffers() {
             std::cerr << "Failed to create framebuffer" << std::endl;
             exit(-1);
         }
+    }
+}
+
+void VulkanRenderer::createCommandPool() {
+    VkCommandPoolCreateInfo poolInfo = {};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.queueFamilyIndex = graphicsFamily;
+    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    
+    if (vkCreateCommandPool(logicalDevice, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
+        std::cerr << "Failed to create command pool" << std::endl;
+        exit(-1);
+    }
+}
+
+void VulkanRenderer::createCommandBuffers() {
+    commandBuffers.resize(swapChainFramebuffers.size());
+    
+    VkCommandBufferAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = commandPool;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = commandBuffers.size();
+    
+    if (vkAllocateCommandBuffers(logicalDevice, &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate command buffers!" << std::endl;
+        exit(-1);
     }
 }
