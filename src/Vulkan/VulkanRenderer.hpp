@@ -52,6 +52,8 @@ class VulkanRenderer : public Renderer {
         void createCommandPool();
         void createCommandBuffers();
         
+        std::vector<Mesh*> drawList;
+        
         SDL_Window* window;
         
         VkInstance instance;

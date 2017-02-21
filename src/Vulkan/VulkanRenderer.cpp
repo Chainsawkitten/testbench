@@ -167,7 +167,7 @@ void VulkanRenderer::setRenderState(RenderState* ps) {
 }
 
 void VulkanRenderer::submit(Mesh* mesh) {
-    //UNIMPLEMENTED
+    drawList.push_back(mesh);
 }
 
 void VulkanRenderer::frame() {
@@ -191,9 +191,14 @@ void VulkanRenderer::frame() {
         renderPassInfo.pClearValues = &clearColor;
         
         vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        
+        // Draw meshes.
+        for (Mesh* mesh : drawList) {
+            /// @todo Draw mesh
+        }
     }
     
-    //UNIMPLEMENTED
+    drawList.clear();
 }
 
 void VulkanRenderer::present() {
