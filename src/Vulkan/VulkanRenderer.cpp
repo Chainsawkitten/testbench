@@ -201,6 +201,11 @@ void VulkanRenderer::frame() {
         
         // End render pass.
         vkCmdEndRenderPass(commandBuffers[i]);
+        
+        if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+            std::cerr << "Failed to record command buffer" << std::endl;
+            exit(-1);
+        }
     }
     
     drawList.clear();
