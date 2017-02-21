@@ -198,6 +198,9 @@ void VulkanRenderer::frame() {
             vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipeline());
             vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
         }
+        
+        // End render pass.
+        vkCmdEndRenderPass(commandBuffers[i]);
     }
     
     drawList.clear();
