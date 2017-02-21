@@ -46,12 +46,12 @@ class VulkanRenderer : public Renderer {
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, unsigned int width, unsigned int height);
         VkFormat createSwapChain(unsigned int width, unsigned int height);
         
+        void createSemaphores();
         void createImageViews(VkFormat format);
         void createRenderPass(VkFormat format);
         void createFramebuffers();
         void createCommandPool();
         void createCommandBuffers();
-        void createSemaphores();
         
         std::vector<Mesh*> drawList;
         
