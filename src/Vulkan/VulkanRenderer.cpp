@@ -196,6 +196,7 @@ void VulkanRenderer::frame() {
         for (Mesh* mesh : drawList) {
             MaterialVulkan* material = static_cast<MaterialVulkan*>(mesh->technique->material);
             vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipeline());
+            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
         }
     }
     
