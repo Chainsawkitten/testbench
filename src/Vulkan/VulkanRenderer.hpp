@@ -73,4 +73,5 @@ class VulkanRenderer : public Renderer {
         std::vector<VkFramebuffer> swapChainFramebuffers;
         VkCommandPool commandPool;
         std::vector<VkCommandBuffer> commandBuffers;
+        VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 };

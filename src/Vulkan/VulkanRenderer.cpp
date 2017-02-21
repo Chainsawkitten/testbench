@@ -155,7 +155,7 @@ int VulkanRenderer::shutdown() {
 }
 
 void VulkanRenderer::setClearColor(float r, float g, float b, float a) {
-    UNIMPLEMENTED
+    clearColor = {r, g, b, a};
 }
 
 void VulkanRenderer::clearBuffer(unsigned int flag) {
@@ -187,12 +187,10 @@ void VulkanRenderer::frame() {
         renderPassInfo.framebuffer = swapChainFramebuffers[i];
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = swapChainExtent;
-        
-        VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
         renderPassInfo.clearValueCount = 1;
-        renderPassInfo.pClearValues = &clearCoor;
+        renderPassInfo.pClearValues = &clearColor;
         
-        vkCmdBeginRenderPass(commandBuffers[i], &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
     
     //UNIMPLEMENTED
