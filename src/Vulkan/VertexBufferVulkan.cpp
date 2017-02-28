@@ -26,12 +26,13 @@ VertexBufferVulkan::VertexBufferVulkan(VkDevice* logicalDevice, VkPhysicalDevice
 }
 
 VertexBufferVulkan::~VertexBufferVulkan() {
-    //UNIMPLEMENTED
+    vkDestroyBuffer(*logicalDevice, storageBuffer, nullptr);
+    vkDestroyDescriptorSetLayout(*logicalDevice, descriptorSetLayout, nullptr);
 }
 
 void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage) {
     totalSize = size;
-    // Create vertex buffer.
+    // Create vertex storage buffer.
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
