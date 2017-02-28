@@ -51,7 +51,7 @@ class VulkanRenderer : public Renderer {
         void createRenderPass(VkFormat format);
         void createFramebuffers();
         void createCommandPool();
-        void createCommandBuffers();
+        void createCommandBuffer();
         
         std::vector<Mesh*> drawList;
         
@@ -77,6 +77,10 @@ class VulkanRenderer : public Renderer {
         VkRenderPass renderPass;
         std::vector<VkFramebuffer> swapChainFramebuffers;
         VkCommandPool commandPool;
-        std::vector<VkCommandBuffer> commandBuffers;
+        VkCommandBuffer commandBuffer;
         VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+        
+        // Current swap chain index to render to.
+        uint32_t imageIndex;
+        VkFence fence;
 };
