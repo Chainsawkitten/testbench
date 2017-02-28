@@ -28,15 +28,31 @@ VertexBufferVulkan::VertexBufferVulkan(VkDevice* logicalDevice, VkPhysicalDevice
 VertexBufferVulkan::~VertexBufferVulkan() {
     vkDestroyBuffer(*logicalDevice, storageBuffer, nullptr);
     vkDestroyDescriptorSetLayout(*logicalDevice, descriptorSetLayout, nullptr);
+    vkFreeMemory(*logicalDevice, storageBufferObjectMemory, nullptr);
 }
 
 void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage) {
+
+    // @todo: Find static/dynamic/et.c equivalents in vulkan.
+    // VkBufferUsageFlagBits vulkanUsage;
+    /*switch(DATA_USAGE) {
+        case STATIC:
+            break;
+        case DYNAMIC:
+            vulkanUsage = vulkanUsage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+            break;
+        case DONTCARE:
+            break;
+        default:
+            break;
+    }*/
+
     totalSize = size;
     // Create vertex storage buffer.
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
-    bufferInfo.usage = usage;
+    bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     if(vkCreateBuffer(*logicalDevice, &bufferInfo, nullptr, &storageBuffer) != VK_SUCCESS)
