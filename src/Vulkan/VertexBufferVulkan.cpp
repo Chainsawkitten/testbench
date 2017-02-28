@@ -9,20 +9,6 @@ std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::
 VertexBufferVulkan::VertexBufferVulkan(VkDevice* logicalDevice, VkPhysicalDevice* physicalDevice) {
     this->physicalDevice = physicalDevice;
     this->logicalDevice = logicalDevice;
-
-    VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
-    vertexLayoutBinding.binding = 0;
-    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    vertexLayoutBinding.pImmutableSamplers = nullptr;
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &vertexLayoutBinding;
-
-    if(vkCreateDescriptorSetLayout(*logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout))
-        std::cerr << "Could not create descriptor set!" << std::endl;
 }
 
 VertexBufferVulkan::~VertexBufferVulkan() {
@@ -93,7 +79,19 @@ void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage
 }
 
 void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location) {
-    // Function intentionally left unimplemented.
+    VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
+    vertexLayoutBinding.binding = location;
+    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    vertexLayoutBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &vertexLayoutBinding;
+
+    if(vkCreateDescriptorSetLayout(*logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout))
+        std::cerr << "Could not create descriptor set!" << std::endl;
 }
 
 void VertexBufferVulkan::unbind() {
