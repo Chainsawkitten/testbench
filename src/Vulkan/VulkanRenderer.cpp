@@ -216,6 +216,15 @@ void VulkanRenderer::frame() {
 }
 
 void VulkanRenderer::present() {
+    // Create fence.
+    VkFenceCreateInfo fenceInfo = {};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.pNext = nullptr;
+    fenceInfo.flags = 0;
+    
+    VkFence fence;
+    vkCreateFence(logicalDevice, &fenceInfo, nullptr, &fence);
+    
     // Create submit info.
     VkSubmitInfo submitInfo = {};
     VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
@@ -245,6 +254,9 @@ void VulkanRenderer::present() {
 
     // Submit presentation request.
     vkQueuePresentKHR(presentQueue, &presentInfo);
+    
+    // Wait for finished rendering.
+    vkDestroyFence(logicalDevice, fence, nullptr);
 }
 
 void VulkanRenderer::createInstance() {
