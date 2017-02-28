@@ -77,11 +77,11 @@ void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage
 }
 
 void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location) {
-
+    // Function intentionally left unimplemented.
 }
 
 void VertexBufferVulkan::unbind() {
-    UNIMPLEMENTED
+    // Function intentionally left unimplemented.
 }
 
 size_t VertexBufferVulkan::getSize() {
