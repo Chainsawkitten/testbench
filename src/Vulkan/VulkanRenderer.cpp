@@ -125,11 +125,20 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     
     // Create semaphores.
     createSemaphores();
+    
+    // Create fence.
+    VkFenceCreateInfo fenceInfo = {};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.pNext = nullptr;
+    fenceInfo.flags = 0;
+    
+    vkCreateFence(logicalDevice, &fenceInfo, nullptr, &fence);
 
     return 0;
 }
 
 int VulkanRenderer::shutdown() {
+    vkDestroyFence(logicalDevice, fence, nullptr);
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
     
     for (VkFramebuffer& framebuffer : swapChainFramebuffers)
@@ -216,15 +225,6 @@ void VulkanRenderer::frame() {
 }
 
 void VulkanRenderer::present() {
-    // Create fence.
-    VkFenceCreateInfo fenceInfo = {};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.pNext = nullptr;
-    fenceInfo.flags = 0;
-    
-    VkFence fence;
-    vkCreateFence(logicalDevice, &fenceInfo, nullptr, &fence);
-    
     // Create submit info.
     VkSubmitInfo submitInfo = {};
     VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
@@ -257,7 +257,7 @@ void VulkanRenderer::present() {
     
     // Wait for finished rendering.
     while (vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, 1000) != VK_SUCCESS);
-    vkDestroyFence(logicalDevice, fence, nullptr);
+    vkResetFences(logicalDevice, 1, &fence);
 }
 
 void VulkanRenderer::createInstance() {
