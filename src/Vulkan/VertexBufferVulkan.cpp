@@ -63,15 +63,17 @@ void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage
     allocationInfo.allocationSize = memoryRequirements.size;
     allocationInfo.memoryTypeIndex = memoryType;
 
+    //Allocate memory on the device
     if(vkAllocateMemory(*logicalDevice, &allocationInfo, nullptr, &storageBufferObjectMemory) != VK_SUCCESS)
         std::cerr << "Could not allocate memory!" << std::endl;
 
-    vkBindBufferMemory(*logicalDevice, storageBuffer, storageBufferObjectMemory, 0);
-
+    //Copy data from data to mapped memory.
     void* mappedMemory;
     vkMapMemory(*logicalDevice, storageBufferObjectMemory, 0, bufferInfo.size, 0, &mappedMemory);
     memcpy(mappedMemory, data, size);
     vkUnmapMemory(*logicalDevice, storageBufferObjectMemory);
+
+    vkBindBufferMemory(*logicalDevice, storageBuffer, storageBufferObjectMemory, 0);
 }
 
 void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location) {
