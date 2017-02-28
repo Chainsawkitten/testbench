@@ -238,10 +238,10 @@ void VulkanRenderer::present() {
     submitInfo.pSignalSemaphores = signalSemaphores;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
-
-    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
+    
+    if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, fence) != VK_SUCCESS)
         std::cout << "Could not submit command buffer to graphics queue." << std::endl;
-
+    
     // Setup presentation
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -251,11 +251,12 @@ void VulkanRenderer::present() {
     presentInfo.pSwapchains = &swapChain;
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
-
+    
     // Submit presentation request.
     vkQueuePresentKHR(presentQueue, &presentInfo);
     
     // Wait for finished rendering.
+    while (vkWaitForFences(logicalDevice, 1, &fence, VK_TRUE, 1000) != VK_SUCCESS);
     vkDestroyFence(logicalDevice, fence, nullptr);
 }
 
