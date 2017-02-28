@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Base/VertexBuffer.hpp"
-#include "vulkan/vulkan.h"
+#include <vulkan/vulkan.h>
 
 class VertexBufferVulkan : public VertexBuffer {
     public:
