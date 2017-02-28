@@ -174,6 +174,9 @@ void VulkanRenderer::submit(Mesh* mesh) {
 }
 
 void VulkanRenderer::frame() {
+    // Get image from swapchain.
+    vkAcquireNextImageKHR(logicalDevice, swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    
     for (std::size_t i = 0; i < commandBuffers.size(); ++i) {
         // Start command buffer recording.
         VkCommandBufferBeginInfo beginInfo = {};
@@ -215,10 +218,6 @@ void VulkanRenderer::frame() {
 }
 
 void VulkanRenderer::present() {
-    // Get image from swapchain.
-    uint32_t imageIndex;
-    vkAcquireNextImageKHR(logicalDevice, swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
-
     // Create submit info.
     VkSubmitInfo submitInfo = {};
     VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};

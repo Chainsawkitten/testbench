@@ -79,4 +79,7 @@ class VulkanRenderer : public Renderer {
         VkCommandPool commandPool;
         std::vector<VkCommandBuffer> commandBuffers;
         VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+        
+        // Current swap chain index to render to.
+        uint32_t imageIndex;
 };
