@@ -13,11 +13,11 @@ class VertexBufferVulkan : public VertexBuffer {
         void unbind() final;
         size_t getSize() final;
     private:
-        VkBuffer vertexBuffer;
-        VkDeviceMemory vertexBufferMemory;
-        VkVertexInputAttributeDescription attributeDescription = {};
-        VkVertexInputBindingDescription bindingDescription = {};
+        VkBuffer storageBuffer;
+        VkDeviceMemory storageBufferObjectMemory;
         VkDevice* logicalDevice;
         VkPhysicalDevice* physicalDevice;
         size_t totalSize;
+        VkDescriptorSetLayout descriptorSetLayout;
+        VkPipelineLayout pipelineLayout;
 };

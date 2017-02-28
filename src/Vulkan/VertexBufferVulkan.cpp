@@ -9,6 +9,20 @@ std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::
 VertexBufferVulkan::VertexBufferVulkan(VkDevice* logicalDevice, VkPhysicalDevice* physicalDevice) {
     this->physicalDevice = physicalDevice;
     this->logicalDevice = logicalDevice;
+
+    VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
+    vertexLayoutBinding.binding = 0;
+    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    vertexLayoutBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &vertexLayoutBinding;
+
+    if(vkCreateDescriptorSetLayout(*logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout))
+        std::cerr << "Could not create descriptor set!" << std::endl;
 }
 
 VertexBufferVulkan::~VertexBufferVulkan() {
@@ -24,12 +38,12 @@ void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if(vkCreateBuffer(*logicalDevice, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS)
+    if(vkCreateBuffer(*logicalDevice, &bufferInfo, nullptr, &storageBuffer) != VK_SUCCESS)
         std::cerr << "Could not create vertex buffer!" << std::endl;
 
     // Get information about device memory.
     VkMemoryRequirements memoryRequirements;
-    vkGetBufferMemoryRequirements(*logicalDevice, vertexBuffer, &memoryRequirements);
+    vkGetBufferMemoryRequirements(*logicalDevice, storageBuffer, &memoryRequirements);
 
     VkPhysicalDeviceMemoryProperties memoryProperties;
     vkGetPhysicalDeviceMemoryProperties(*physicalDevice, &memoryProperties);
@@ -48,50 +62,19 @@ void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage
     allocationInfo.allocationSize = memoryRequirements.size;
     allocationInfo.memoryTypeIndex = memoryType;
 
-    if(vkAllocateMemory(*logicalDevice, &allocationInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS)
+    if(vkAllocateMemory(*logicalDevice, &allocationInfo, nullptr, &storageBufferObjectMemory) != VK_SUCCESS)
         std::cerr << "Could not allocate memory!" << std::endl;
 
-    vkBindBufferMemory(*logicalDevice, vertexBuffer, vertexBufferMemory, 0);
+    vkBindBufferMemory(*logicalDevice, storageBuffer, storageBufferObjectMemory, 0);
 
     void* mappedMemory;
-    vkMapMemory(*logicalDevice, vertexBufferMemory, 0, bufferInfo.size, 0, &mappedMemory);
+    vkMapMemory(*logicalDevice, storageBufferObjectMemory, 0, bufferInfo.size, 0, &mappedMemory);
     memcpy(mappedMemory, data, size);
-    vkUnmapMemory(*logicalDevice, vertexBufferMemory);
+    vkUnmapMemory(*logicalDevice, storageBufferObjectMemory);
 }
 
 void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location) {
-    VkFormat format = VK_FORMAT_UNDEFINED;
 
-    // Assuming that each element in vertex is 32b float.
-    switch(size){
-        case 1:
-            format = VK_FORMAT_R32_SFLOAT;
-            break;
-
-        case 2:
-            format = VK_FORMAT_R32G32_SFLOAT;
-            break;
-
-        case 3:
-            format = VK_FORMAT_R32G32B32_SFLOAT;
-            break;
-
-        case 4:
-            format = VK_FORMAT_R32G32B32A32_SFLOAT;
-            break;
-        default:
-            std::cerr << "Could not find proper format!" << std::endl;
-            break;
-    }
-
-    bindingDescription.binding = 0;
-    bindingDescription.stride = size;
-    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-    attributeDescription.binding = 0;
-    attributeDescription.location = location;
-    attributeDescription.format = format;
-    attributeDescription.offset = offset;
 }
 
 void VertexBufferVulkan::unbind() {
