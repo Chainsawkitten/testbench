@@ -139,6 +139,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
 
 int VulkanRenderer::shutdown() {
     vkDestroyFence(logicalDevice, fence, nullptr);
+    vkDestroySemaphore(logicalDevice, renderFinishedSemaphore, nullptr);
+    vkDestroySemaphore(logicalDevice, imageAvailableSemaphore, nullptr);
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
     
     for (VkFramebuffer& framebuffer : swapChainFramebuffers)
