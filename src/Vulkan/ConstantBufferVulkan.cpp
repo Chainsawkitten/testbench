@@ -13,7 +13,9 @@ ConstantBufferVulkan::ConstantBufferVulkan(std::string NAME, unsigned int locati
 }
 
 ConstantBufferVulkan::~ConstantBufferVulkan() {
-    
+    vkDestroyBuffer(*logicalDevice, storageBuffer, nullptr);
+    vkDestroyDescriptorSetLayout(*logicalDevice, descriptorSetLayout, nullptr);
+    vkFreeMemory(*logicalDevice, uniformBufferMemory, nullptr);
 }
 
 void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, unsigned int location) {
