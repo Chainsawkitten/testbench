@@ -12,7 +12,7 @@ Texture2DVulkan::Texture2DVulkan(VkDevice device) {
 }
 
 Texture2DVulkan::~Texture2DVulkan() {
-    
+    vkDestroyImage(device, stagingImage, nullptr);
 }
 
 int Texture2DVulkan::loadFromFile(std::string filename) {
