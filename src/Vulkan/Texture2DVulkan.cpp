@@ -13,6 +13,7 @@ Texture2DVulkan::Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physic
 }
 
 Texture2DVulkan::~Texture2DVulkan() {
+    vkFreeMemory(logicalDevice, stagingImageMemory, nullptr);
     vkDestroyImage(logicalDevice, stagingImage, nullptr);
 }
 
