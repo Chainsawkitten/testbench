@@ -74,10 +74,35 @@ int Texture2DVulkan::loadFromFile(std::string filename) {
         exit(-1);
     }
     
+    // Transfer image data.
+    vkBindImageMemory(logicalDevice, stagingImage, stagingImageMemory, 0);
+    
+    void* data;
+    vkMapMemory(logicalDevice, stagingImageMemory, 0, imageSize, 0, &data);
+    
+    VkImageSubresource subresource = {};
+    subresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    subresource.mipLevel = 0;
+    subresource.arrayLayer = 0;
+    
+    VkSubresourceLayout stagingImageLayout;
+    vkGetImageSubresourceLayout(logicalDevice, stagingImage, &subresource, &stagingImageLayout);
+    
+    if (stagingImageLayout.rowPitch == width * 4u) {
+        memcpy(data, pixels, imageSize);
+    } else {
+        uint8_t* dataBytes = reinterpret_cast<uint8_t*>(data);
+        
+        for (int y = 0; y < height; ++y)
+            memcpy(&dataBytes[y * stagingImageLayout.rowPitch], &pixels[y * width * 4], width * 4);
+    }
+    
+    vkUnmapMemory(logicalDevice, stagingImageMemory);
+    
     UNIMPLEMENTED
     
     // Clean up.
-    delete[] pixels;
+    stbi_image_free(pixels);
     
     return 0;
 }
