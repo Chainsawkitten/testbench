@@ -19,7 +19,7 @@ ConstantBufferVulkan::~ConstantBufferVulkan() {
 }
 
 void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, unsigned int location) {
-    // Create vertex storage buffer.
+    // Create uniform buffer.
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
@@ -27,7 +27,7 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     if(vkCreateBuffer(*logicalDevice, &bufferInfo, nullptr, &storageBuffer) != VK_SUCCESS)
-        std::cerr << "Could not create vertex buffer!" << std::endl;
+        std::cerr << "Could not create uniform buffer!" << std::endl;
 
     // Get information about device memory.
     VkMemoryRequirements memoryRequirements;
@@ -64,16 +64,16 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
 }
 
 void ConstantBufferVulkan::bind(Material* material) {
-    VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
-    vertexLayoutBinding.binding = location;
-    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    vertexLayoutBinding.pImmutableSamplers = nullptr;
+    VkDescriptorSetLayoutBinding uniformLayoutBinding = {};
+    uniformLayoutBinding.binding = location;
+    uniformLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    uniformLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    uniformLayoutBinding.pImmutableSamplers = nullptr;
 
     VkDescriptorSetLayoutCreateInfo layoutInfo = {};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &vertexLayoutBinding;
+    layoutInfo.pBindings = &uniformLayoutBinding;
 
     if(vkCreateDescriptorSetLayout(*logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout))
         std::cerr << "Could not create descriptor set!" << std::endl;
