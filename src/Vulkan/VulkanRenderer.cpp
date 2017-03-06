@@ -42,7 +42,7 @@ Mesh* VulkanRenderer::makeMesh() {
 }
 
 Texture2D* VulkanRenderer::makeTexture2D() {
-    return new Texture2DVulkan(logicalDevice);
+    return new Texture2DVulkan(logicalDevice, physicalDevice);
 }
 
 Sampler2D* VulkanRenderer::makeSampler2D() {

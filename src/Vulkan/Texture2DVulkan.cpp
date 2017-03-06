@@ -7,12 +7,13 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
-Texture2DVulkan::Texture2DVulkan(VkDevice device) {
-    this->device = device;
+Texture2DVulkan::Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice) {
+    this->logicalDevice = logicalDevice;
+    this->physicalDevice = physicalDevice;
 }
 
 Texture2DVulkan::~Texture2DVulkan() {
-    vkDestroyImage(device, stagingImage, nullptr);
+    vkDestroyImage(logicalDevice, stagingImage, nullptr);
 }
 
 int Texture2DVulkan::loadFromFile(std::string filename) {
@@ -42,14 +43,35 @@ int Texture2DVulkan::loadFromFile(std::string filename) {
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.flags = 0;
     
-    if (vkCreateImage(device, &imageInfo, nullptr, &stagingImage) != VK_SUCCESS) {
+    if (vkCreateImage(logicalDevice, &imageInfo, nullptr, &stagingImage) != VK_SUCCESS) {
         std::cerr << "Failed to create image." << std::endl;
         exit(-1);
     }
     
-    // Allocate memory.
+    // Find suitable memory type.
     VkMemoryRequirements memoryRequirements;
-    vkGetImageMemoryRequirements(device, stagingImage, &memoryRequirements);
+    vkGetImageMemoryRequirements(logicalDevice, stagingImage, &memoryRequirements);
+    
+    VkPhysicalDeviceMemoryProperties memoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
+    
+    uint32_t memoryType;
+    unsigned int properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
+        if (memoryRequirements.memoryTypeBits & (1u << i) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties )
+            memoryType = i;
+    }
+    
+    // Allocate memory.
+    VkMemoryAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.allocationSize = memoryRequirements.size;
+    allocateInfo.memoryTypeIndex = memoryType;
+    
+    if (vkAllocateMemory(logicalDevice, &allocateInfo, nullptr, &stagingImageMemory) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate image memory." << std::endl;
+        exit(-1);
+    }
     
     UNIMPLEMENTED
     
