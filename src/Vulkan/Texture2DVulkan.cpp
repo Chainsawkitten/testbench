@@ -47,6 +47,10 @@ int Texture2DVulkan::loadFromFile(std::string filename) {
         exit(-1);
     }
     
+    // Allocate memory.
+    VkMemoryRequirements memoryRequirements;
+    vkGetImageMemoryRequirements(device, stagingImage, &memoryRequirements);
+    
     UNIMPLEMENTED
     
     // Clean up.
