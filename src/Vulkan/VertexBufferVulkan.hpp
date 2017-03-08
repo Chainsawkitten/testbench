@@ -2,6 +2,7 @@
 
 #include "../Base/VertexBuffer.hpp"
 #include <vulkan/vulkan.h>
+#include <map>
 
 class VertexBufferVulkan : public VertexBuffer {
     public:
@@ -13,11 +14,11 @@ class VertexBufferVulkan : public VertexBuffer {
         void unbind() final;
         size_t getSize() final;
     private:
-        VkBuffer storageBuffer;
-        VkDeviceMemory storageBufferObjectMemory;
         VkDevice* logicalDevice;
+        const void* tempData;
         VkPhysicalDevice* physicalDevice;
-        size_t totalSize;
-        VkDescriptorSetLayout descriptorSetLayout;
-        VkPipelineLayout pipelineLayout;
+        static std::map<unsigned int, unsigned int> offsetMap;
+        static std::map<unsigned int, VkDeviceMemory> memoryMap;
+        static std::map<unsigned int, VkBuffer> bufferMap;
+        static std::map<unsigned int, VkDescriptorSetLayout> layoutMap;
 };

@@ -2,6 +2,11 @@
 
 #include <iostream>
 
+std::map<unsigned int, unsigned int> VertexBufferVulkan::offsetMap;
+std::map<unsigned int, VkDeviceMemory> VertexBufferVulkan::memoryMap;
+std::map<unsigned int, VkBuffer> VertexBufferVulkan::bufferMap;
+std::map<unsigned int, VkDescriptorSetLayout> VertexBufferVulkan::layoutMap;
+
 #define UNIMPLEMENTED {\
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
