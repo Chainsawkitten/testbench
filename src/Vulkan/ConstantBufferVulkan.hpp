@@ -3,6 +3,7 @@
 #include "../Base/ConstantBuffer.hpp"
 
 #include <vulkan/vulkan.h>
+#include <map>
 
 class ConstantBufferVulkan : public ConstantBuffer {
     public:
@@ -17,4 +18,7 @@ class ConstantBufferVulkan : public ConstantBuffer {
         VkBuffer storageBuffer;
         VkDeviceMemory uniformBufferMemory;
         VkDescriptorSetLayout descriptorSetLayout;
+        std::map<unsigned int, descriptorSetLayout> layoutMap;
+        std::map<unsigned int, VkBuffer> bufferMap;
+        std::map<unsigned int, VkDeviceMemory> memoryMap;
 };
