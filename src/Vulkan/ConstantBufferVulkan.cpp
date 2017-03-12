@@ -18,6 +18,7 @@ ConstantBufferVulkan::ConstantBufferVulkan(std::string NAME, unsigned int locati
 }
 
 ConstantBufferVulkan::~ConstantBufferVulkan() {
+    // @todo: Remove this, or do it better or whatever.
     //vkDestroyBuffer(*logicalDevice, storageBuffer, nullptr);
     //vkDestroyDescriptorSetLayout(*logicalDevice, descriptorSetLayout, nullptr);
     //vkFreeMemory(*logicalDevice, uniformBufferMemory, nullptr);
