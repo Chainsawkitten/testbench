@@ -15,10 +15,9 @@ class ConstantBufferVulkan : public ConstantBuffer {
         unsigned int location;
         VkDevice* logicalDevice;
         VkPhysicalDevice* physicalDevice;
-        VkBuffer storageBuffer;
-        VkDeviceMemory uniformBufferMemory;
-        VkDescriptorSetLayout descriptorSetLayout;
-        std::map<unsigned int, descriptorSetLayout> layoutMap;
-        std::map<unsigned int, VkBuffer> bufferMap;
-        std::map<unsigned int, VkDeviceMemory> memoryMap;
+        static std::map<unsigned int, VkDescriptorSetLayout> layoutMap;
+        static std::map<unsigned int, VkBuffer> bufferMap;
+        static std::map<unsigned int, VkDeviceMemory> memoryMap;
+        static std::map<unsigned int, unsigned int> offsetMap;
+        const void * tempData;
 };
