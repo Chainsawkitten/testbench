@@ -50,7 +50,7 @@ Sampler2D* VulkanRenderer::makeSampler2D() {
 }
 
 ConstantBuffer* VulkanRenderer::makeConstantBuffer(std::string name, unsigned int location) { 
-    return new ConstantBufferVulkan(name, location);
+    return new ConstantBufferVulkan(name, location, &logicalDevice, &physicalDevice);
 }
 
 std::string VulkanRenderer::getShaderPath() {
