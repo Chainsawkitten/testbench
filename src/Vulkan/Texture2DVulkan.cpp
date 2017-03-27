@@ -28,55 +28,9 @@ int Texture2DVulkan::loadFromFile(std::string filename) {
     }
     
     // Create staging image.
-    VkImageCreateInfo imageInfo = {};
-    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent.width = width;
-    imageInfo.extent.height = height;
-    imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = 1;
-    imageInfo.arrayLayers = 1;
-    imageInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
-    imageInfo.tiling = VK_IMAGE_TILING_LINEAR;
-    imageInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.flags = 0;
-    
-    if (vkCreateImage(logicalDevice, &imageInfo, nullptr, &stagingImage) != VK_SUCCESS) {
-        std::cerr << "Failed to create image." << std::endl;
-        exit(-1);
-    }
-    
-    // Find suitable memory type.
-    VkMemoryRequirements memoryRequirements;
-    vkGetImageMemoryRequirements(logicalDevice, stagingImage, &memoryRequirements);
-    
-    VkPhysicalDeviceMemoryProperties memoryProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
-    
-    uint32_t memoryType;
-    unsigned int properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
-        if (memoryRequirements.memoryTypeBits & (1u << i) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties )
-            memoryType = i;
-    }
-    
-    // Allocate memory.
-    VkMemoryAllocateInfo allocateInfo = {};
-    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocateInfo.allocationSize = memoryRequirements.size;
-    allocateInfo.memoryTypeIndex = memoryType;
-    
-    if (vkAllocateMemory(logicalDevice, &allocateInfo, nullptr, &stagingImageMemory) != VK_SUCCESS) {
-        std::cerr << "Failed to allocate image memory." << std::endl;
-        exit(-1);
-    }
+    createImage(width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &stagingImage, &stagingImageMemory);
     
     // Transfer image data.
-    vkBindImageMemory(logicalDevice, stagingImage, stagingImageMemory, 0);
-    
     void* data;
     vkMapMemory(logicalDevice, stagingImageMemory, 0, imageSize, 0, &data);
     
@@ -109,4 +63,58 @@ int Texture2DVulkan::loadFromFile(std::string filename) {
 
 void Texture2DVulkan::bind(unsigned int slot) {
     UNIMPLEMENTED
+}
+
+void Texture2DVulkan::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage* image, VkDeviceMemory* imageMemory) {
+    // Create image.
+    VkImageCreateInfo imageInfo = {};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.extent.width = width;
+    imageInfo.extent.height = height;
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+    imageInfo.tiling = VK_IMAGE_TILING_LINEAR;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
+    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.flags = 0;
+    
+    if (vkCreateImage(logicalDevice, &imageInfo, nullptr, image) != VK_SUCCESS) {
+        std::cerr << "Failed to create image." << std::endl;
+        exit(-1);
+    }
+    
+    // Get memory requirements.
+    VkMemoryRequirements memoryRequirements;
+    vkGetImageMemoryRequirements(logicalDevice, *image, &memoryRequirements);
+    
+    // Allocate memory.
+    VkMemoryAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.allocationSize = memoryRequirements.size;
+    allocateInfo.memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits, properties);
+    
+    if (vkAllocateMemory(logicalDevice, &allocateInfo, nullptr, imageMemory)) {
+        std::cerr << "Failed to allocate image memory." << std::endl;
+        exit(-1);
+    }
+    
+    vkBindImageMemory(logicalDevice, *image, *imageMemory, 0);
+}
+
+uint32_t Texture2DVulkan::findMemoryType(uint32_t memoryTypeBits, VkMemoryPropertyFlags properties) {
+    VkPhysicalDeviceMemoryProperties memoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
+    
+    uint32_t memoryType;
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
+        if (memoryTypeBits & (1u << i) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties )
+            memoryType = i;
+    }
+    
+    return memoryType;
 }
