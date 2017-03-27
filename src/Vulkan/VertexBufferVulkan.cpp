@@ -17,11 +17,17 @@ VertexBufferVulkan::VertexBufferVulkan(VkDevice logicalDevice, VkPhysicalDevice 
 }
 
 VertexBufferVulkan::~VertexBufferVulkan() {
-    for (unsigned int i = 0; i < 3; i++){
-        vkDestroyBuffer(logicalDevice, bufferMap[i], nullptr);
-        vkDestroyDescriptorSetLayout(logicalDevice, layoutMap[i], nullptr);
-        vkFreeMemory(logicalDevice, memoryMap[i], nullptr);
-    }
+    for (auto& it : bufferMap)
+        vkDestroyBuffer(logicalDevice, it.second, nullptr);
+    bufferMap.clear();
+    
+    for (auto& it : layoutMap)
+        vkDestroyDescriptorSetLayout(logicalDevice, it.second, nullptr);
+    layoutMap.clear();
+    
+    for (auto& it : memoryMap)
+        vkFreeMemory(logicalDevice, it.second, nullptr);
+    memoryMap.clear();
 }
 
 void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage) {
