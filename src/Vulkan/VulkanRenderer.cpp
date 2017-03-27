@@ -50,7 +50,7 @@ Sampler2D* VulkanRenderer::makeSampler2D() {
 }
 
 ConstantBuffer* VulkanRenderer::makeConstantBuffer(std::string name, unsigned int location) { 
-    return new ConstantBufferVulkan(name, location, &logicalDevice, &physicalDevice);
+    return new ConstantBufferVulkan(name, location, logicalDevice, physicalDevice);
 }
 
 std::string VulkanRenderer::getShaderPath() {
@@ -62,7 +62,7 @@ std::string VulkanRenderer::getShaderExtension() {
 }
 
 VertexBuffer* VulkanRenderer::makeVertexBuffer() { 
-    return new VertexBufferVulkan(&logicalDevice, &physicalDevice);
+    return new VertexBufferVulkan(logicalDevice, physicalDevice);
 }
 
 Material* VulkanRenderer::makeMaterial() { 
