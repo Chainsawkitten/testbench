@@ -16,19 +16,30 @@ layout(binding=POSITION) buffer pos { vec4 position_in[]; };*/
 //  	vec4 tx;
 // } transform;
 
-/*layout(binding=TRANSLATION) uniform TRANSLATION_NAME
-{
+layout(binding=TRANSLATION) buffer TRANSLATION_NAME {
 	vec4 translate;
 };
 
-layout(binding=DIFFUSE_TINT) uniform DIFFUSE_TINT_NAME
-{
-	vec4 diffuseTint;
-};*/
+layout(binding=POSITION) buffer Position {
+	vec4 position;
+};
+
+#ifdef NORMAL
+layout(binding=NORMAL) buffer Normal {
+	vec4 normal;
+};
+layout(location=NORMAL) out vec4 normal_out;
+#endif TEXTCOORD
+
+#ifdef TEXTCOORD
+	layout(binding=TEXTCOORD) buffer Textcoord {
+		vec2 UV;
+	};
+	layout(location=TEXTCOORD) out vec2 uv_out;
+#endif
 
 void main() {
-
-	/*#ifdef NORMAL
+	#ifdef NORMAL
 		normal_out = normal_in[gl_VertexIndex];
 	#endif
 
@@ -36,7 +47,8 @@ void main() {
 		uv_out = uv_in[gl_VertexIndex];
 	#endif
 
-	gl_Position = position_in[gl_VertexIndex] + translate;*/
+	//gl_Position = position_in[gl_VertexIndex] + translate;
+	
     
-    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+    gl_Position = position + translate;
 }
