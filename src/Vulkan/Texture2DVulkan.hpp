@@ -15,6 +15,7 @@ class Texture2DVulkan : public Texture2D {
         void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage* image, VkDeviceMemory* imageMemory);
         uint32_t findMemoryType(uint32_t memoryTypeBits, VkMemoryPropertyFlags properties);
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void copyImage(VkImage srcImage, VkImage dstImage, uint32_t width, uint32_t height);
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
         
