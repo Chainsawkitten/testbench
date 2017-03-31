@@ -17,6 +17,10 @@ class Texture2DVulkan : public Texture2D {
         
         VkDevice logicalDevice;
         VkPhysicalDevice physicalDevice;
+        
         VkImage stagingImage;
         VkDeviceMemory stagingImageMemory;
+        
+        VkImage textureImage;
+        VkDeviceMemory textureImageMemory;
 };

@@ -15,6 +15,9 @@ Texture2DVulkan::Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physic
 Texture2DVulkan::~Texture2DVulkan() {
     vkFreeMemory(logicalDevice, stagingImageMemory, nullptr);
     vkDestroyImage(logicalDevice, stagingImage, nullptr);
+    
+    vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
+    vkDestroyImage(logicalDevice, textureImage, nullptr);
 }
 
 int Texture2DVulkan::loadFromFile(std::string filename) {
@@ -53,10 +56,13 @@ int Texture2DVulkan::loadFromFile(std::string filename) {
     
     vkUnmapMemory(logicalDevice, stagingImageMemory);
     
-    UNIMPLEMENTED
-    
     // Clean up.
     stbi_image_free(pixels);
+    
+    // Create texture image.
+    createImage(width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &textureImage, &textureImageMemory);
+    
+    UNIMPLEMENTED
     
     return 0;
 }
