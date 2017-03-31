@@ -64,11 +64,7 @@ int Texture2DVulkan::loadFromFile(std::string filename) {
     // Create texture image.
     createImage(width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &textureImage, &textureImageMemory);
     
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
-    
-    UNIMPLEMENTED
-    
-    endSingleTimeCommands(commandBuffer);
+    /// @todo Transition image layout.
     
     return 0;
 }
@@ -129,6 +125,29 @@ uint32_t Texture2DVulkan::findMemoryType(uint32_t memoryTypeBits, VkMemoryProper
     }
     
     return memoryType;
+}
+
+void Texture2DVulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    
+    VkImageMemoryBarrier barrier = {};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    barrier.srcAccessMask = 0; /// @todo
+    barrier.dstAccessMask = 0; /// @todo
+    
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+    
+    endSingleTimeCommands(commandBuffer);
 }
 
 VkCommandBuffer Texture2DVulkan::beginSingleTimeCommands() {
