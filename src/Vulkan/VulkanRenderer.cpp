@@ -46,7 +46,7 @@ Texture2D* VulkanRenderer::makeTexture2D() {
 }
 
 Sampler2D* VulkanRenderer::makeSampler2D() {
-    return new Sampler2DVulkan();
+    return new Sampler2DVulkan(logicalDevice);
 }
 
 ConstantBuffer* VulkanRenderer::makeConstantBuffer(std::string name, unsigned int location) { 
