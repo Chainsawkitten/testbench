@@ -68,6 +68,9 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
         //Allocate memory on the device
         if (vkAllocateMemory(logicalDevice, &allocationInfo, nullptr, &memoryMap[location]) != VK_SUCCESS)
             std::cerr << "Could not allocate memory!" << std::endl;
+        
+        // Bind memory to buffer.
+        vkBindBufferMemory(logicalDevice, bufferMap[location], memoryMap[location], 0);
     } else
         offsetMap[location]++;
     
@@ -79,8 +82,6 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
     vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*size, size, 0, &mappedMemory);
     memcpy(mappedMemory, data, size);
     vkUnmapMemory(logicalDevice, memoryMap[location]);
-    
-    //vkBindBufferMemory(*logicalDevice, bufferMap[location], memoryMap[location], 0);
 }
 
 void ConstantBufferVulkan::bind(Material* material) {
