@@ -6,7 +6,7 @@
 
 class VertexBufferVulkan : public VertexBuffer {
     public:
-        VertexBufferVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice) ;
+        VertexBufferVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkDescriptorPool descriptorPool) ;
         ~VertexBufferVulkan() final;
         
         void setData(const void* data, size_t size, DATA_USAGE usage) final;
@@ -16,6 +16,7 @@ class VertexBufferVulkan : public VertexBuffer {
     private:
         VkDevice logicalDevice;
         VkPhysicalDevice physicalDevice;
+        VkDescriptorPool descriptorPool;
         
         const void* tempData;
         static std::map<unsigned int, unsigned int> offsetMap;

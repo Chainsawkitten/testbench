@@ -62,7 +62,7 @@ std::string VulkanRenderer::getShaderExtension() {
 }
 
 VertexBuffer* VulkanRenderer::makeVertexBuffer() { 
-    return new VertexBufferVulkan(logicalDevice, physicalDevice);
+    return new VertexBufferVulkan(logicalDevice, physicalDevice, descriptorPool);
 }
 
 Material* VulkanRenderer::makeMaterial() { 
