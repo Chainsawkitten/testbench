@@ -15,6 +15,8 @@ Texture2DVulkan::Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physic
 }
 
 Texture2DVulkan::~Texture2DVulkan() {
+    vkDestroyImageView(logicalDevice, textureImageView, nullptr);
+    
     vkFreeMemory(logicalDevice, stagingImageMemory, nullptr);
     vkDestroyImage(logicalDevice, stagingImage, nullptr);
     
@@ -69,6 +71,9 @@ int Texture2DVulkan::loadFromFile(std::string filename) {
     transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     copyImage(stagingImage, textureImage, width, height);
     transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    
+    // Create image view.
+    createImageView(textureImage, VK_FORMAT_R8G8B8A8_UNORM, &textureImageView);
     
     return 0;
 }
@@ -220,4 +225,22 @@ void Texture2DVulkan::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
     vkQueueWaitIdle(graphicsQueue);
     
     vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
+}
+
+void Texture2DVulkan::createImageView(VkImage image, VkFormat format, VkImageView* imageView) {
+    VkImageViewCreateInfo viewInfo = {};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = image;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = format;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+    
+    if (vkCreateImageView(logicalDevice, &viewInfo, nullptr, imageView) != VK_SUCCESS) {
+        std::cerr << "Failed to create texture image view." << std::endl;
+        exit(-1);
+    }
 }

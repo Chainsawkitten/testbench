@@ -18,6 +18,7 @@ class Texture2DVulkan : public Texture2D {
         void copyImage(VkImage srcImage, VkImage dstImage, uint32_t width, uint32_t height);
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+        void createImageView(VkImage image, VkFormat format, VkImageView* imageView);
         
         VkDevice logicalDevice;
         VkPhysicalDevice physicalDevice;
@@ -29,4 +30,6 @@ class Texture2DVulkan : public Texture2D {
         
         VkImage textureImage;
         VkDeviceMemory textureImageMemory;
+        
+        VkImageView textureImageView;
 };
