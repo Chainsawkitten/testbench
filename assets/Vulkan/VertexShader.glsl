@@ -1,5 +1,5 @@
 // buffer inputs
-#ifdef NORMAL
+/*#ifdef NORMAL
     layout(binding=NORMAL) buffer nor { vec4 normal_in[]; };
     layout(location=NORMAL) out vec4 normal_out;
 #endif
@@ -18,11 +18,11 @@ layout(binding=TRANSLATION) uniform TRANSLATION_NAME
 layout(binding=DIFFUSE_TINT) uniform DIFFUSE_TINT_NAME
 {
     vec4 diffuseTint;
-};
+};*/
 
 void main() {
 
-    #ifdef NORMAL
+    /*#ifdef NORMAL
         normal_out = normal_in[gl_VertexIndex];
     #endif
 
@@ -30,5 +30,7 @@ void main() {
         uv_out = uv_in[gl_VertexIndex];
     #endif
 
-    gl_Position = position_in[gl_VertexIndex] + translate;
+    gl_Position = position_in[gl_VertexIndex] + translate;*/
+    
+    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
 }
