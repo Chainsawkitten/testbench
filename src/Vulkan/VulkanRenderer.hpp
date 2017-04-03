@@ -78,7 +78,7 @@ class VulkanRenderer : public Renderer {
         std::vector<VkFramebuffer> swapChainFramebuffers;
         VkCommandPool commandPool;
         VkCommandBuffer commandBuffer;
-        VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+        VkClearValue clearColor;
         
         // Current swap chain index to render to.
         uint32_t imageIndex;
