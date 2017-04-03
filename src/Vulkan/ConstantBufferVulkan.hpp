@@ -7,13 +7,14 @@
 
 class ConstantBufferVulkan : public ConstantBuffer {
     public:
-        ConstantBufferVulkan(std::string NAME, unsigned int location, VkDevice logicalDevice, VkPhysicalDevice physicalDevice);
+        ConstantBufferVulkan(std::string NAME, unsigned int location, VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkDescriptorPool descriptorPool);
         ~ConstantBufferVulkan() final;
         void setData(const void* data, size_t size, Material* m, unsigned int location) final;
         void bind(Material* material) final;
     private:
         VkDevice logicalDevice;
         VkPhysicalDevice physicalDevice;
+        VkDescriptorPool descriptorPool;
         
         unsigned int location;
         static std::map<unsigned int, VkDescriptorSetLayout> layoutMap;
