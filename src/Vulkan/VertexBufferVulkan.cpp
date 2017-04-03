@@ -97,7 +97,7 @@ void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location)
     } else
         offsetMap[location]++;
     
-    //Copy data from data to mapped memory.
+    // Copy data from data to mapped memory.
     void* mappedMemory;
     vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*size, size, 0, &mappedMemory);
     memcpy(mappedMemory, tempData, size);
@@ -106,19 +106,22 @@ void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location)
     if (offsetMap[location] == 1999)
         vkBindBufferMemory(logicalDevice, bufferMap[location], memoryMap[location], 0);
     
-    VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
-    vertexLayoutBinding.binding = location;
-    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    vertexLayoutBinding.pImmutableSamplers = nullptr;
-    
-    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &vertexLayoutBinding;
-    
-    if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &layoutMap[location]))
-        std::cerr << "Could not create descriptor set!" << std::endl;
+    // Only create descriptor set layout if one doesn't exist for this location.
+    if (layoutMap.find(location) == layoutMap.end()) {
+        VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
+        vertexLayoutBinding.binding = location;
+        vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        vertexLayoutBinding.pImmutableSamplers = nullptr;
+        
+        VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = 1;
+        layoutInfo.pBindings = &vertexLayoutBinding;
+        
+        if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &layoutMap[location]))
+            std::cerr << "Could not create descriptor set!" << std::endl;
+    }
 }
 
 void VertexBufferVulkan::unbind() {
