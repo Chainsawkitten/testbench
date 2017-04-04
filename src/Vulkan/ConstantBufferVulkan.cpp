@@ -28,6 +28,8 @@ ConstantBufferVulkan::~ConstantBufferVulkan() {
 
 void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, unsigned int location) {
     if (offsetMap.find(location) == offsetMap.end() ) {
+        offsetMap[location] = 0;
+        
         // Create uniform buffer.
         VkDeviceSize deviceSize = createBuffer(size * 2000, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &bufferMap[location], &memoryMap[location]);
         
@@ -68,7 +70,7 @@ VkDeviceSize ConstantBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsage
     
     // Get information about device memory.
     VkMemoryRequirements memoryRequirements;
-    vkGetBufferMemoryRequirements(logicalDevice, bufferMap[location], &memoryRequirements);
+    vkGetBufferMemoryRequirements(logicalDevice, *buffer, &memoryRequirements);
     
     VkPhysicalDeviceMemoryProperties memoryProperties;
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
@@ -92,6 +94,8 @@ VkDeviceSize ConstantBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsage
     }
     
     vkBindBufferMemory(logicalDevice, *buffer, *bufferMemory, 0);
+    
+    return memoryRequirements.size;
 }
 
 void ConstantBufferVulkan::createDescriptorLayout() {
