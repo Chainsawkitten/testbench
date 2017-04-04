@@ -6,6 +6,7 @@ std::map<unsigned int, unsigned int> VertexBufferVulkan::offsetMap;
 std::map<unsigned int, VkDeviceMemory> VertexBufferVulkan::memoryMap;
 std::map<unsigned int, VkBuffer> VertexBufferVulkan::bufferMap;
 std::map<unsigned int, VkDescriptorSetLayout> VertexBufferVulkan::layoutMap;
+std::map<unsigned int, VkDescriptorSet> VertexBufferVulkan::descriptorSetMap;
 
 #define UNIMPLEMENTED {\
     std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
@@ -58,6 +59,9 @@ void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location)
         
         // Create descriptor set layout.
         createDescriptorLayout(location);
+        
+        // Create descriptor set.
+        createDescriptorSet(location);
     } else
         offsetMap[location]++;
     
@@ -133,4 +137,18 @@ void VertexBufferVulkan::createDescriptorLayout(uint32_t location) {
     
     if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &layoutMap[location]))
         std::cerr << "Could not create descriptor set!" << std::endl;
+}
+
+void VertexBufferVulkan::createDescriptorSet(uint32_t location) {
+    // Allocate descriptor set.
+    VkDescriptorSetAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = descriptorPool;
+    allocateInfo.descriptorSetCount = 1;
+    allocateInfo.pSetLayouts = &layoutMap[location];
+    
+    if (vkAllocateDescriptorSets(logicalDevice, &allocateInfo, &descriptorSetMap[location]) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate descriptor set" << std::endl;
+        exit(-1);
+    }
 }
