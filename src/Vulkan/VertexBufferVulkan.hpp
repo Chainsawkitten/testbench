@@ -16,6 +16,7 @@ class VertexBufferVulkan : public VertexBuffer {
         
     private:
         VkDeviceSize createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory);
+        void createDescriptorLayout(uint32_t location);
         
         VkDevice logicalDevice;
         VkPhysicalDevice physicalDevice;
