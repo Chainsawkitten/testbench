@@ -100,6 +100,7 @@ void ConstantBufferVulkan::createDescriptorLayout() {
     VkDescriptorSetLayoutBinding uniformLayoutBinding = {};
     uniformLayoutBinding.binding = location;
     uniformLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uniformLayoutBinding.descriptorCount = 1;
     uniformLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uniformLayoutBinding.pImmutableSamplers = nullptr;
     
