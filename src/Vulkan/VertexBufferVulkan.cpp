@@ -127,6 +127,7 @@ void VertexBufferVulkan::createDescriptorLayout(uint32_t location) {
     VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
     vertexLayoutBinding.binding = location;
     vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    vertexLayoutBinding.descriptorCount = 1;
     vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     vertexLayoutBinding.pImmutableSamplers = nullptr;
     
