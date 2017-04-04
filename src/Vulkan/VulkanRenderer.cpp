@@ -641,12 +641,12 @@ void VulkanRenderer::createDescriptorPool() {
     // Uniform buffers.
     poolSizes[0] = {};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = 1;
+    poolSizes[0].descriptorCount = 3;
     
     // Storage buffers.
     poolSizes[1] = {};
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    poolSizes[1].descriptorCount = 1;
+    poolSizes[1].descriptorCount = 3;
     
     // Create descriptor pool.
     VkDescriptorPoolCreateInfo poolInfo = {};
