@@ -27,58 +27,15 @@ ConstantBufferVulkan::~ConstantBufferVulkan() {
 }
 
 void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, unsigned int location) {
-    // Create uniform buffer.
     if (offsetMap.find(location) == offsetMap.end() ) {
-        VkBufferCreateInfo bufferInfo = {};
-        VkBuffer newBuffer;
-        VkDeviceMemory newMemory;
-        VkDescriptorSetLayout newLayout;
-        
-        offsetMap.insert(std::make_pair(location, 0));
-        memoryMap.insert(std::make_pair(location, newMemory));
-        bufferMap.insert(std::make_pair(location, newBuffer));
-        layoutMap.insert(std::make_pair(location, newLayout));
-        
-        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = size*20000;
-        bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        
-        if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &bufferMap[location]) != VK_SUCCESS)
-            std::cerr << "Could not create uniform buffer!" << std::endl;
-        
-        // Get information about device memory.
-        VkMemoryRequirements memoryRequirements;
-        vkGetBufferMemoryRequirements(logicalDevice, bufferMap[location], &memoryRequirements);
-        
-        VkPhysicalDeviceMemoryProperties memoryProperties;
-        vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
-        
-        // Find suitable memory type.
-        uint32_t memoryType;
-        int properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-        for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
-            if (memoryRequirements.memoryTypeBits & (1 << i) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties )
-                memoryType = i;
-        }
-        
-        VkMemoryAllocateInfo allocationInfo = {};
-        allocationInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocationInfo.allocationSize = memoryRequirements.size;
-        allocationInfo.memoryTypeIndex = memoryType;
-        
-        // Allocate memory on the device
-        if (vkAllocateMemory(logicalDevice, &allocationInfo, nullptr, &memoryMap[location]) != VK_SUCCESS)
-            std::cerr << "Could not allocate memory!" << std::endl;
-        
-        // Bind memory to buffer.
-        vkBindBufferMemory(logicalDevice, bufferMap[location], memoryMap[location], 0);
+        // Create uniform buffer.
+        VkDeviceSize deviceSize = createBuffer(size * 2000, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &bufferMap[location], &memoryMap[location]);
         
         // Create descriptor set layout.
         createDescriptorLayout();
         
         //  Create descriptor set.
-        createDescriptorSet(memoryRequirements.size);
+        createDescriptorSet(deviceSize);
     } else
         offsetMap[location]++;
     
@@ -94,6 +51,47 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
 
 void ConstantBufferVulkan::bind(Material* material) {
     // Intentionally not implemented.
+}
+
+VkDeviceSize ConstantBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory) {
+    // Create buffer.
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    
+    if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, buffer) != VK_SUCCESS) {
+        std::cerr << "Failed to create buffer." << std::endl;
+        exit(-1);
+    }
+    
+    // Get information about device memory.
+    VkMemoryRequirements memoryRequirements;
+    vkGetBufferMemoryRequirements(logicalDevice, bufferMap[location], &memoryRequirements);
+    
+    VkPhysicalDeviceMemoryProperties memoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
+    
+    // Find suitable memory type.
+    uint32_t memoryType;
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
+        if (memoryRequirements.memoryTypeBits & (1 << i) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties )
+            memoryType = i;
+    }
+    
+    // Allocate buffer memory.
+    VkMemoryAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.allocationSize = memoryRequirements.size;
+    allocateInfo.memoryTypeIndex = memoryType;
+    
+    if (vkAllocateMemory(logicalDevice, &allocateInfo, nullptr, bufferMemory) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate buffer memory." << std::endl;
+        exit(-1);
+    }
+    
+    vkBindBufferMemory(logicalDevice, *buffer, *bufferMemory, 0);
 }
 
 void ConstantBufferVulkan::createDescriptorLayout() {

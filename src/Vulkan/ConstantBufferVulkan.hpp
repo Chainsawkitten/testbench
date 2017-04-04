@@ -13,6 +13,7 @@ class ConstantBufferVulkan : public ConstantBuffer {
         void bind(Material* material) final;
         
     private:
+        VkDeviceSize createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory);
         void createDescriptorLayout();
         void createDescriptorSet(VkDeviceSize size);
         
