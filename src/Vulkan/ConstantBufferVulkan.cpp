@@ -78,7 +78,7 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
         createDescriptorLayout();
         
         //  Create descriptor set.
-        createDescriptorSet();
+        createDescriptorSet(memoryRequirements.size);
     } else
         offsetMap[location]++;
     
@@ -112,7 +112,8 @@ void ConstantBufferVulkan::createDescriptorLayout() {
         std::cerr << "Could not create descriptor set!" << std::endl;
 }
 
-void ConstantBufferVulkan::createDescriptorSet() {
+void ConstantBufferVulkan::createDescriptorSet(VkDeviceSize size) {
+    // Allocate descriptor set.
     VkDescriptorSetAllocateInfo allocateInfo = {};
     allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocateInfo.descriptorPool = descriptorPool;
@@ -123,4 +124,10 @@ void ConstantBufferVulkan::createDescriptorSet() {
         std::cerr << "Failed to allocate descriptor set" << std::endl;
         exit(-1);
     }
+    
+    // Update descriptor set.
+    VkDescriptorBufferInfo bufferInfo = {};
+    bufferInfo.buffer = bufferMap[location];
+    bufferInfo.offset = 0;
+    bufferInfo.range = size;
 }

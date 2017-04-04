@@ -14,7 +14,7 @@ class ConstantBufferVulkan : public ConstantBuffer {
         
     private:
         void createDescriptorLayout();
-        void createDescriptorSet();
+        void createDescriptorSet(VkDeviceSize size);
         
         VkDevice logicalDevice;
         VkPhysicalDevice physicalDevice;
