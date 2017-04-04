@@ -61,7 +61,7 @@ void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location)
         createDescriptorLayout(location);
         
         // Create descriptor set.
-        createDescriptorSet(location);
+        createDescriptorSet(location, size * 2000);
     } else
         offsetMap[location]++;
     
@@ -139,7 +139,7 @@ void VertexBufferVulkan::createDescriptorLayout(uint32_t location) {
         std::cerr << "Could not create descriptor set!" << std::endl;
 }
 
-void VertexBufferVulkan::createDescriptorSet(uint32_t location) {
+void VertexBufferVulkan::createDescriptorSet(uint32_t location, VkDeviceSize size) {
     // Allocate descriptor set.
     VkDescriptorSetAllocateInfo allocateInfo = {};
     allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -151,4 +151,10 @@ void VertexBufferVulkan::createDescriptorSet(uint32_t location) {
         std::cerr << "Failed to allocate descriptor set" << std::endl;
         exit(-1);
     }
+    
+    // Update descriptor set.
+    VkDescriptorBufferInfo bufferInfo = {};
+    bufferInfo.buffer = bufferMap[location];
+    bufferInfo.offset = 0;
+    bufferInfo.range = size;
 }
