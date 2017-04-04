@@ -11,7 +11,10 @@ class ConstantBufferVulkan : public ConstantBuffer {
         ~ConstantBufferVulkan() final;
         void setData(const void* data, size_t size, Material* m, unsigned int location) final;
         void bind(Material* material) final;
+        
     private:
+        void createDescriptorLayout();
+        
         VkDevice logicalDevice;
         VkPhysicalDevice physicalDevice;
         VkDescriptorPool descriptorPool;

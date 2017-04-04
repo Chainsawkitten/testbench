@@ -72,6 +72,11 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
         
         // Bind memory to buffer.
         vkBindBufferMemory(logicalDevice, bufferMap[location], memoryMap[location], 0);
+        
+        // Create descriptor set layout.
+        createDescriptorLayout();
+        
+        /// @todo Create descriptor set.
     } else
         offsetMap[location]++;
     
@@ -86,9 +91,13 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
 }
 
 void ConstantBufferVulkan::bind(Material* material) {
+    // Intentionally not implemented.
+}
+
+void ConstantBufferVulkan::createDescriptorLayout() {
     VkDescriptorSetLayoutBinding uniformLayoutBinding = {};
     uniformLayoutBinding.binding = location;
-    uniformLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    uniformLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uniformLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uniformLayoutBinding.pImmutableSamplers = nullptr;
     
