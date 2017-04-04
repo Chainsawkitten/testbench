@@ -131,4 +131,17 @@ void ConstantBufferVulkan::createDescriptorSet(VkDeviceSize size) {
     bufferInfo.buffer = bufferMap[location];
     bufferInfo.offset = 0;
     bufferInfo.range = size;
+    
+    VkWriteDescriptorSet descriptorWrite = {};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = descriptorSetMap[location];
+    descriptorWrite.dstBinding = location;
+    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrite.descriptorCount = 1;
+    descriptorWrite.pBufferInfo = &bufferInfo;
+    descriptorWrite.pImageInfo = nullptr;
+    descriptorWrite.pTexelBufferView = nullptr;
+    
+    vkUpdateDescriptorSets(logicalDevice, 1, &descriptorWrite, 0, nullptr);
 }
