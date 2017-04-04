@@ -11,10 +11,11 @@ std::map<unsigned int, VkDeviceMemory> ConstantBufferVulkan::memoryMap;
 std::map<unsigned int, VkBuffer> ConstantBufferVulkan::bufferMap;
 std::map<unsigned int, VkDescriptorSetLayout> ConstantBufferVulkan::layoutMap;
 
-ConstantBufferVulkan::ConstantBufferVulkan(std::string NAME, unsigned int location, VkDevice logicalDevice, VkPhysicalDevice physicalDevice) {
+ConstantBufferVulkan::ConstantBufferVulkan(std::string NAME, unsigned int location, VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkDescriptorPool descriptorPool) {
     this->location = location;
     this->physicalDevice = physicalDevice;
     this->logicalDevice = logicalDevice;
+    this->descriptorPool = descriptorPool;
 }
 
 ConstantBufferVulkan::~ConstantBufferVulkan() {
@@ -65,22 +66,23 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
         allocationInfo.allocationSize = memoryRequirements.size;
         allocationInfo.memoryTypeIndex = memoryType;
         
-        //Allocate memory on the device
+        // Allocate memory on the device
         if (vkAllocateMemory(logicalDevice, &allocationInfo, nullptr, &memoryMap[location]) != VK_SUCCESS)
             std::cerr << "Could not allocate memory!" << std::endl;
+        
+        // Bind memory to buffer.
+        vkBindBufferMemory(logicalDevice, bufferMap[location], memoryMap[location], 0);
     } else
         offsetMap[location]++;
     
     if (offsetMap[location] == 2000)
         offsetMap[location] = 0;
     
-    //Copy data from data to mapped memory.
+    // Copy data from data to mapped memory.
     void* mappedMemory;
     vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*size, size, 0, &mappedMemory);
     memcpy(mappedMemory, data, size);
     vkUnmapMemory(logicalDevice, memoryMap[location]);
-    
-    //vkBindBufferMemory(*logicalDevice, bufferMap[location], memoryMap[location], 0);
 }
 
 void ConstantBufferVulkan::bind(Material* material) {

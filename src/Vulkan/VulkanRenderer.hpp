@@ -52,6 +52,7 @@ class VulkanRenderer : public Renderer {
         void createFramebuffers();
         void createCommandPool();
         void createCommandBuffer();
+        void createDescriptorPool();
         
         std::vector<Mesh*> drawList;
         
@@ -78,6 +79,7 @@ class VulkanRenderer : public Renderer {
         std::vector<VkFramebuffer> swapChainFramebuffers;
         VkCommandPool commandPool;
         VkCommandBuffer commandBuffer;
+        VkDescriptorPool descriptorPool;
         VkClearValue clearColor;
         
         // Current swap chain index to render to.

@@ -11,9 +11,10 @@ std::map<unsigned int, VkDescriptorSetLayout> VertexBufferVulkan::layoutMap;
     std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
     }
 
-VertexBufferVulkan::VertexBufferVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice) {
+VertexBufferVulkan::VertexBufferVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkDescriptorPool descriptorPool) {
     this->physicalDevice = physicalDevice;
     this->logicalDevice = logicalDevice;
+    this->descriptorPool = descriptorPool;
 }
 
 VertexBufferVulkan::~VertexBufferVulkan() {

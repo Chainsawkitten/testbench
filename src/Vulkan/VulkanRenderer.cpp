@@ -50,7 +50,7 @@ Sampler2D* VulkanRenderer::makeSampler2D() {
 }
 
 ConstantBuffer* VulkanRenderer::makeConstantBuffer(std::string name, unsigned int location) { 
-    return new ConstantBufferVulkan(name, location, logicalDevice, physicalDevice);
+    return new ConstantBufferVulkan(name, location, logicalDevice, physicalDevice, descriptorPool);
 }
 
 std::string VulkanRenderer::getShaderPath() {
@@ -62,7 +62,7 @@ std::string VulkanRenderer::getShaderExtension() {
 }
 
 VertexBuffer* VulkanRenderer::makeVertexBuffer() { 
-    return new VertexBufferVulkan(logicalDevice, physicalDevice);
+    return new VertexBufferVulkan(logicalDevice, physicalDevice, descriptorPool);
 }
 
 Material* VulkanRenderer::makeMaterial() { 
@@ -123,6 +123,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     createCommandPool();
     createCommandBuffer();
     
+    // Create descriptor pool.
+    createDescriptorPool();
+    
     // Create semaphores.
     createSemaphores();
     
@@ -141,6 +144,7 @@ int VulkanRenderer::shutdown() {
     vkDestroyFence(logicalDevice, fence, nullptr);
     vkDestroySemaphore(logicalDevice, renderFinishedSemaphore, nullptr);
     vkDestroySemaphore(logicalDevice, imageAvailableSemaphore, nullptr);
+    vkDestroyDescriptorPool(logicalDevice, descriptorPool, nullptr);
     vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
     
     for (VkFramebuffer& framebuffer : swapChainFramebuffers)
@@ -627,6 +631,32 @@ void VulkanRenderer::createCommandBuffer() {
     
     if (vkAllocateCommandBuffers(logicalDevice, &allocInfo, &commandBuffer) != VK_SUCCESS) {
         std::cerr << "Failed to allocate command buffer!" << std::endl;
+        exit(-1);
+    }
+}
+
+void VulkanRenderer::createDescriptorPool() {
+    VkDescriptorPoolSize poolSizes[2];
+    
+    // Uniform buffers.
+    poolSizes[0] = {};
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[0].descriptorCount = 1;
+    
+    // Storage buffers.
+    poolSizes[1] = {};
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    poolSizes[1].descriptorCount = 1;
+    
+    // Create descriptor pool.
+    VkDescriptorPoolCreateInfo poolInfo = {};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = 2;
+    poolInfo.pPoolSizes = poolSizes;
+    poolInfo.maxSets = 6;
+    
+    if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+        std::cerr << "Failed to create descriptor pool." << std::endl;
         exit(-1);
     }
 }
