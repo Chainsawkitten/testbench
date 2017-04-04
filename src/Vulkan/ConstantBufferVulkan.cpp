@@ -10,6 +10,7 @@ std::map<unsigned int, unsigned int> ConstantBufferVulkan::offsetMap;
 std::map<unsigned int, VkDeviceMemory> ConstantBufferVulkan::memoryMap;
 std::map<unsigned int, VkBuffer> ConstantBufferVulkan::bufferMap;
 std::map<unsigned int, VkDescriptorSetLayout> ConstantBufferVulkan::layoutMap;
+std::map<unsigned int, VkDescriptorSet> ConstantBufferVulkan::descriptorSetMap;
 
 ConstantBufferVulkan::ConstantBufferVulkan(std::string NAME, unsigned int location, VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkDescriptorPool descriptorPool) {
     this->location = location;
@@ -76,7 +77,8 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
         // Create descriptor set layout.
         createDescriptorLayout();
         
-        /// @todo Create descriptor set.
+        //  Create descriptor set.
+        createDescriptorSet();
     } else
         offsetMap[location]++;
     
@@ -108,4 +110,17 @@ void ConstantBufferVulkan::createDescriptorLayout() {
     
     if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &layoutMap[location]))
         std::cerr << "Could not create descriptor set!" << std::endl;
+}
+
+void ConstantBufferVulkan::createDescriptorSet() {
+    VkDescriptorSetAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = descriptorPool;
+    allocateInfo.descriptorSetCount = 1;
+    allocateInfo.pSetLayouts = &layoutMap[location];
+    
+    if (vkAllocateDescriptorSets(logicalDevice, &allocateInfo, &descriptorSetMap[location]) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate descriptor set" << std::endl;
+        exit(-1);
+    }
 }

@@ -14,6 +14,7 @@ class ConstantBufferVulkan : public ConstantBuffer {
         
     private:
         void createDescriptorLayout();
+        void createDescriptorSet();
         
         VkDevice logicalDevice;
         VkPhysicalDevice physicalDevice;
@@ -21,6 +22,7 @@ class ConstantBufferVulkan : public ConstantBuffer {
         
         unsigned int location;
         static std::map<unsigned int, VkDescriptorSetLayout> layoutMap;
+        static std::map<unsigned int, VkDescriptorSet> descriptorSetMap;
         static std::map<unsigned int, VkBuffer> bufferMap;
         static std::map<unsigned int, VkDeviceMemory> memoryMap;
         static std::map<unsigned int, unsigned int> offsetMap;
