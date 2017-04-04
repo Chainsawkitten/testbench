@@ -20,10 +20,17 @@ ConstantBufferVulkan::ConstantBufferVulkan(std::string NAME, unsigned int locati
 }
 
 ConstantBufferVulkan::~ConstantBufferVulkan() {
-    // @todo: Remove this, or do it better or whatever.
-    //vkDestroyBuffer(*logicalDevice, storageBuffer, nullptr);
-    //vkDestroyDescriptorSetLayout(*logicalDevice, descriptorSetLayout, nullptr);
-    //vkFreeMemory(*logicalDevice, uniformBufferMemory, nullptr);
+    for (auto& it : bufferMap)
+        vkDestroyBuffer(logicalDevice, it.second, nullptr);
+    bufferMap.clear();
+    
+    for (auto& it : memoryMap)
+        vkFreeMemory(logicalDevice, it.second, nullptr);
+    memoryMap.clear();
+    
+    for (auto& it : layoutMap)
+        vkDestroyDescriptorSetLayout(logicalDevice, it.second, nullptr);
+    layoutMap.clear();
 }
 
 void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, unsigned int location) {
