@@ -27,6 +27,9 @@ MaterialVulkan::~MaterialVulkan() {
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     
+    // Clean up descriptor set layouts.
+    vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+    
     // Clean up shader modules.
     for (auto& it : shaderModules)
         vkDestroyShaderModule(device, it.second, nullptr);
