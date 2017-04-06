@@ -313,4 +313,30 @@ void MaterialVulkan::createDescriptorSetLayouts() {
     }
     
     descriptorSetLayouts.push_back(layout);
+    
+    // Normal storage buffer.
+    layoutBinding.binding = 1;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+    layoutBinding.descriptorCount = 1;
+    layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &layout) != VK_SUCCESS) {
+        std::cerr << "Failed to create descriptor set layout." << std::endl;
+        exit(-1);
+    }
+    
+    descriptorSetLayouts.push_back(layout);
+    
+    // Texture coordinate storage buffer.
+    layoutBinding.binding = 2;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+    layoutBinding.descriptorCount = 1;
+    layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &layout) != VK_SUCCESS) {
+        std::cerr << "Failed to create descriptor set layout." << std::endl;
+        exit(-1);
+    }
+    
+    descriptorSetLayouts.push_back(layout);
 }
