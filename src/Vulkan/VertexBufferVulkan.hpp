@@ -23,6 +23,7 @@ class VertexBufferVulkan : public VertexBuffer {
         VkPhysicalDevice physicalDevice;
         VkDescriptorPool descriptorPool;
         
+        uint32_t paddedSize;
         const void* tempData;
         static std::map<unsigned int, unsigned int> offsetMap;
         static std::map<unsigned int, VkDeviceMemory> memoryMap;

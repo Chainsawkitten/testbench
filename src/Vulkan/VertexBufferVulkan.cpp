@@ -50,24 +50,29 @@ void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage
 }
 
 void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location) {
+    uint32_t minOffset = 32;
+    paddedSize = size;
+    if (paddedSize % minOffset != 0)
+        paddedSize += minOffset - (paddedSize % minOffset);
+    
     // Incredibly crude and dodgy workaround incoming. Thanks Fransisco...
     if (offsetMap.find(location) == offsetMap.end() ) {
         offsetMap[location] = 0;
         
         // Create storage buffer.
-        createBuffer(size * 2000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &bufferMap[location], &memoryMap[location]);
+        createBuffer(paddedSize * 2000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &bufferMap[location], &memoryMap[location]);
         
         // Create descriptor set layout.
         createDescriptorLayout(location);
         
         // Create descriptor set.
-        createDescriptorSet(location, size * 2000);
+        createDescriptorSet(location, paddedSize);
     } else
         offsetMap[location]++;
     
     // Copy data from data to mapped memory.
     void* mappedMemory;
-    vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*size, size, 0, &mappedMemory);
+    vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*paddedSize, size, 0, &mappedMemory);
     memcpy(mappedMemory, tempData, size);
     vkUnmapMemory(logicalDevice, memoryMap[location]);
 }
