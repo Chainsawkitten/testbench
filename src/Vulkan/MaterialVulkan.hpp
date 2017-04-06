@@ -6,7 +6,7 @@
 
 class MaterialVulkan : public Material {
     public:
-        MaterialVulkan(VkDevice device, VkExtent2D swapChainExtent, VkRenderPass renderPass);
+        MaterialVulkan(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D swapChainExtent, VkRenderPass renderPass);
         ~MaterialVulkan();
         
         void setShader(const std::string& shaderFileName, ShaderType type) final;
@@ -32,8 +32,10 @@ class MaterialVulkan : public Material {
         static std::string readFile(const std::string& filename);
         static std::vector<char> readFile2(const std::string& filename);
         void createDescriptorSetLayouts();
+        void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory);
         
         VkDevice device;
+        VkPhysicalDevice physicalDevice;
         std::map<ShaderType, std::string> shaderExtensions;
         std::map<ShaderType, VkShaderModule> shaderModules;
         std::map<ShaderType, VkShaderStageFlagBits> shaderStageFlags;
@@ -42,4 +44,7 @@ class MaterialVulkan : public Material {
         VkPipelineLayout pipelineLayout;
         VkPipeline graphicsPipeline;
         std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
+        
+        VkBuffer diffuseBuffer;
+        VkDeviceMemory diffuseBufferMemory;
 };
