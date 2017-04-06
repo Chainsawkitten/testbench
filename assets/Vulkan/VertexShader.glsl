@@ -1,13 +1,13 @@
 // buffer inputs
-/*#ifdef NORMAL
-    layout(binding=NORMAL) buffer nor { vec4 normal_in[]; };
+layout(set=2, binding=NORMAL) buffer nor { vec4 normal_in[]; };
+#ifdef NORMAL
     layout(location=NORMAL) out vec4 normal_out;
 #endif
 
+layout(set=3, binding=TEXTCOORD) buffer text { vec2 uv_in[]; };
 #ifdef TEXTCOORD
-    layout(binding=TEXTCOORD) buffer text { vec2 uv_in[]; };
     layout(location=TEXTCOORD) out vec2 uv_out;
-#endif*/
+#endif
 layout(set=0, binding=POSITION) buffer pos { vec4 position_in[]; };
 
 layout(set=1, binding=TRANSLATION) uniform TRANSLATION_NAME
@@ -16,13 +16,13 @@ layout(set=1, binding=TRANSLATION) uniform TRANSLATION_NAME
 };
 
 void main() {
-    /*#ifdef NORMAL
+    #ifdef NORMAL
         normal_out = normal_in[gl_VertexIndex];
     #endif
     
     #ifdef TEXTCOORD
         uv_out = uv_in[gl_VertexIndex];
-    #endif*/
+    #endif
     
     gl_Position = position_in[gl_VertexIndex] + translate;
     

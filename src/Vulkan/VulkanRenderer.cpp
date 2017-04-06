@@ -66,7 +66,7 @@ VertexBuffer* VulkanRenderer::makeVertexBuffer() {
 }
 
 Material* VulkanRenderer::makeMaterial() { 
-    return new MaterialVulkan(logicalDevice, swapChainExtent, renderPass);
+    return new MaterialVulkan(logicalDevice, physicalDevice, swapChainExtent, renderPass, descriptorPool);
 }
 
 RenderState* VulkanRenderer::makeRenderState() { 
@@ -229,6 +229,19 @@ void VulkanRenderer::frame() {
         ConstantBufferVulkan* constantBuffer = static_cast<ConstantBufferVulkan*>(mesh->txBuffer);
         descriptorSets.push_back(constantBuffer->getDescriptorSet());
         offsets.push_back(constantBuffer->getOffset());
+        
+        // Normal buffer.
+        vertexBuffer = static_cast<VertexBufferVulkan*>(mesh->geometryBuffers[1].buffer);
+        descriptorSets.push_back(vertexBuffer->getDescriptorSet());
+        offsets.push_back(vertexBuffer->getOffset());
+        
+        // Texture coordinate buffer.
+        vertexBuffer = static_cast<VertexBufferVulkan*>(mesh->geometryBuffers[2].buffer);
+        descriptorSets.push_back(vertexBuffer->getDescriptorSet());
+        offsets.push_back(vertexBuffer->getOffset());
+        
+        // Diffuse buffer.
+        descriptorSets.push_back(material->getDiffuseDescriptorSet());
         
         // Draw command.
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, descriptorSets.size(), descriptorSets.data(), offsets.size(), offsets.data());
@@ -652,24 +665,29 @@ void VulkanRenderer::createCommandBuffer() {
 }
 
 void VulkanRenderer::createDescriptorPool() {
-    VkDescriptorPoolSize poolSizes[2];
+    VkDescriptorPoolSize poolSizes[3];
     
     // Uniform buffers.
     poolSizes[0] = {};
-    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSizes[0].descriptorCount = 3;
     
-    // Storage buffers.
+    // Dynamic uniform buffers.
     poolSizes[1] = {};
-    poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-    poolSizes[1].descriptorCount = 3;
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    poolSizes[1].descriptorCount = 1;
+    
+    // Dynamic storage buffers.
+    poolSizes[2] = {};
+    poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+    poolSizes[2].descriptorCount = 3;
     
     // Create descriptor pool.
     VkDescriptorPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 2;
+    poolInfo.poolSizeCount = 3;
     poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = 6;
+    poolInfo.maxSets = 7;
     
     if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         std::cerr << "Failed to create descriptor pool." << std::endl;

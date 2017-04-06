@@ -7,10 +7,12 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
-MaterialVulkan::MaterialVulkan(VkDevice device, VkExtent2D swapChainExtent, VkRenderPass renderPass) {
+MaterialVulkan::MaterialVulkan(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D swapChainExtent, VkRenderPass renderPass, VkDescriptorPool descriptorPool) {
     this->device = device;
+    this->physicalDevice = physicalDevice;
     this->swapChainExtent = swapChainExtent;
     this->renderPass = renderPass;
+    this->descriptorPool = descriptorPool;
     
     shaderExtensions[ShaderType::VS] = "vert";
     shaderExtensions[ShaderType::GS] = "geom";
@@ -21,9 +23,14 @@ MaterialVulkan::MaterialVulkan(VkDevice device, VkExtent2D swapChainExtent, VkRe
     shaderStageFlags[ShaderType::GS] = VK_SHADER_STAGE_GEOMETRY_BIT;
     shaderStageFlags[ShaderType::PS] = VK_SHADER_STAGE_FRAGMENT_BIT;
     shaderStageFlags[ShaderType::CS] = VK_SHADER_STAGE_COMPUTE_BIT;
+    
+    createBuffer(sizeof(float) * 4, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &diffuseBuffer, &diffuseBufferMemory);
 }
 
 MaterialVulkan::~MaterialVulkan() {
+    vkDestroyBuffer(device, diffuseBuffer, nullptr);
+    vkFreeMemory(device, diffuseBufferMemory, nullptr);
+    
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     
@@ -183,11 +190,15 @@ void MaterialVulkan::setDiffuse(Color c) {
 }
 
 void MaterialVulkan::updateConstantBuffer(const void* data, size_t size, unsigned int location) {
-    UNIMPLEMENTED
+    // Copy data from data to mapped memory.
+    void* mappedMemory;
+    vkMapMemory(device, diffuseBufferMemory, 0, size, 0, &mappedMemory);
+    memcpy(mappedMemory, data, size);
+    vkUnmapMemory(device, diffuseBufferMemory);
 }
 
 void MaterialVulkan::addConstantBuffer(std::string name, unsigned int location) {
-    UNIMPLEMENTED
+    // Intentionally left unimplemented.
 }
 
 VkPipeline MaterialVulkan::getPipeline() const {
@@ -196,6 +207,10 @@ VkPipeline MaterialVulkan::getPipeline() const {
 
 VkPipelineLayout MaterialVulkan::getPipelineLayout() const {
     return pipelineLayout;
+}
+
+VkDescriptorSet MaterialVulkan::getDiffuseDescriptorSet() const {
+    return diffuseDescriptorSet;
 }
 
 int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
@@ -313,4 +328,119 @@ void MaterialVulkan::createDescriptorSetLayouts() {
     }
     
     descriptorSetLayouts.push_back(layout);
+    
+    // Normal storage buffer.
+    layoutBinding.binding = 1;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+    layoutBinding.descriptorCount = 1;
+    layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &layout) != VK_SUCCESS) {
+        std::cerr << "Failed to create descriptor set layout." << std::endl;
+        exit(-1);
+    }
+    
+    descriptorSetLayouts.push_back(layout);
+    
+    // Texture coordinate storage buffer.
+    layoutBinding.binding = 2;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+    layoutBinding.descriptorCount = 1;
+    layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &layout) != VK_SUCCESS) {
+        std::cerr << "Failed to create descriptor set layout." << std::endl;
+        exit(-1);
+    }
+    
+    descriptorSetLayouts.push_back(layout);
+    
+    // Diffuse uniform buffer.
+    layoutBinding.binding = 6;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    layoutBinding.descriptorCount = 1;
+    layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &layout) != VK_SUCCESS) {
+        std::cerr << "Failed to create descriptor set layout." << std::endl;
+        exit(-1);
+    }
+    
+    descriptorSetLayouts.push_back(layout);
+    
+    createUniformDescriptorSet(layout);
+}
+
+void MaterialVulkan::createUniformDescriptorSet(VkDescriptorSetLayout layout) {
+    // Allocate descriptor set.
+    VkDescriptorSetAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = descriptorPool;
+    allocateInfo.descriptorSetCount = 1;
+    allocateInfo.pSetLayouts = &layout;
+    
+    if (vkAllocateDescriptorSets(device, &allocateInfo, &diffuseDescriptorSet) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate descriptor set" << std::endl;
+        exit(-1);
+    }
+    
+    // Update descriptor set.
+    VkDescriptorBufferInfo bufferInfo = {};
+    bufferInfo.buffer = diffuseBuffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(float) * 4;
+    
+    VkWriteDescriptorSet descriptorWrite = {};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = diffuseDescriptorSet;
+    descriptorWrite.dstBinding = 6;
+    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrite.descriptorCount = 1;
+    descriptorWrite.pBufferInfo = &bufferInfo;
+    descriptorWrite.pImageInfo = nullptr;
+    descriptorWrite.pTexelBufferView = nullptr;
+    
+    vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+}
+
+void MaterialVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory) {
+    // Create buffer.
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    
+    if (vkCreateBuffer(device, &bufferInfo, nullptr, buffer) != VK_SUCCESS) {
+        std::cerr << "Failed to create buffer." << std::endl;
+        exit(-1);
+    }
+    
+    // Get information about device memory.
+    VkMemoryRequirements memoryRequirements;
+    vkGetBufferMemoryRequirements(device, *buffer, &memoryRequirements);
+    
+    VkPhysicalDeviceMemoryProperties memoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
+    
+    // Find suitable memory type.
+    uint32_t memoryType;
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
+        if (memoryRequirements.memoryTypeBits & (1 << i) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties )
+            memoryType = i;
+    }
+    
+    // Allocate buffer memory.
+    VkMemoryAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.allocationSize = memoryRequirements.size;
+    allocateInfo.memoryTypeIndex = memoryType;
+    
+    if (vkAllocateMemory(device, &allocateInfo, nullptr, bufferMemory) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate buffer memory." << std::endl;
+        exit(-1);
+    }
+    
+    vkBindBufferMemory(device, *buffer, *bufferMemory, 0);
 }
