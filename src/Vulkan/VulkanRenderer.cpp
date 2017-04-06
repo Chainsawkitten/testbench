@@ -66,7 +66,7 @@ VertexBuffer* VulkanRenderer::makeVertexBuffer() {
 }
 
 Material* VulkanRenderer::makeMaterial() { 
-    return new MaterialVulkan(logicalDevice, physicalDevice, swapChainExtent, renderPass);
+    return new MaterialVulkan(logicalDevice, physicalDevice, swapChainExtent, renderPass, descriptorPool);
 }
 
 RenderState* VulkanRenderer::makeRenderState() { 
@@ -667,7 +667,7 @@ void VulkanRenderer::createDescriptorPool() {
     // Uniform buffers.
     poolSizes[0] = {};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    poolSizes[0].descriptorCount = 3;
+    poolSizes[0].descriptorCount = 4;
     
     // Storage buffers.
     poolSizes[1] = {};
@@ -679,7 +679,7 @@ void VulkanRenderer::createDescriptorPool() {
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = 2;
     poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = 6;
+    poolInfo.maxSets = 7;
     
     if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         std::cerr << "Failed to create descriptor pool." << std::endl;

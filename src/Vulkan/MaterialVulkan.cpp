@@ -7,11 +7,12 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
-MaterialVulkan::MaterialVulkan(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D swapChainExtent, VkRenderPass renderPass) {
+MaterialVulkan::MaterialVulkan(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D swapChainExtent, VkRenderPass renderPass, VkDescriptorPool descriptorPool) {
     this->device = device;
     this->physicalDevice = physicalDevice;
     this->swapChainExtent = swapChainExtent;
     this->renderPass = renderPass;
+    this->descriptorPool = descriptorPool;
     
     shaderExtensions[ShaderType::VS] = "vert";
     shaderExtensions[ShaderType::GS] = "geom";
@@ -362,6 +363,22 @@ void MaterialVulkan::createDescriptorSetLayouts() {
     }
     
     descriptorSetLayouts.push_back(layout);
+    
+    createUniformDescriptorSet(layout);
+}
+
+void MaterialVulkan::createUniformDescriptorSet(VkDescriptorSetLayout layout) {
+    // Allocate descriptor set.
+    VkDescriptorSetAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = descriptorPool;
+    allocateInfo.descriptorSetCount = 1;
+    allocateInfo.pSetLayouts = &layout;
+    
+    if (vkAllocateDescriptorSets(device, &allocateInfo, &diffuseDescriptorSet) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate descriptor set" << std::endl;
+        exit(-1);
+    }
 }
 
 void MaterialVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory) {
