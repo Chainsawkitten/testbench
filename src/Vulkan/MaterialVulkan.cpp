@@ -125,6 +125,9 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
     colorBlending.attachmentCount = 1;
     colorBlending.pAttachments = &colorBlendAttachment;
     
+    // Descriptor set layout.
+    createDescriptorSetLayout(&descriptorSetLayout);
+    
     // Pipeline layout.
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -264,4 +267,24 @@ std::vector<char> MaterialVulkan::readFile2(const std::string& filename) {
     file.close();
     
     return buffer;
+}
+
+void MaterialVulkan::createDescriptorSetLayout(VkDescriptorSetLayout* descriptorSetLayout) {
+    // Describe layout binding.
+    VkDescriptorSetLayoutBinding layoutBinding = {};
+    layoutBinding.binding = 5;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    layoutBinding.descriptorCount = 1;
+    layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    
+    // Create descriptor set layout.
+    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &layoutBinding;
+    
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, descriptorSetLayout) != VK_SUCCESS) {
+        std::cerr << "Failed to create descriptor set layout." << std::endl;
+        exit(-1);
+    }
 }
