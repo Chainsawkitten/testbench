@@ -230,6 +230,16 @@ void VulkanRenderer::frame() {
         descriptorSets.push_back(constantBuffer->getDescriptorSet());
         offsets.push_back(constantBuffer->getOffset());
         
+        // Normal buffer.
+        vertexBuffer = static_cast<VertexBufferVulkan*>(mesh->geometryBuffers[1].buffer);
+        descriptorSets.push_back(vertexBuffer->getDescriptorSet());
+        offsets.push_back(vertexBuffer->getOffset());
+        
+        // Texture coordinate buffer.
+        vertexBuffer = static_cast<VertexBufferVulkan*>(mesh->geometryBuffers[2].buffer);
+        descriptorSets.push_back(vertexBuffer->getDescriptorSet());
+        offsets.push_back(vertexBuffer->getOffset());
+        
         // Draw command.
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, descriptorSets.size(), descriptorSets.data(), offsets.size(), offsets.data());
         vkCmdDraw(commandBuffer, 3, 1, 0, 0);
