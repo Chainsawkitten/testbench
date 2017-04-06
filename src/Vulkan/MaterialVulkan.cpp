@@ -282,10 +282,10 @@ std::vector<char> MaterialVulkan::readFile2(const std::string& filename) {
 void MaterialVulkan::createDescriptorSetLayouts() {
     VkDescriptorSetLayout layout;
     
-    // Transform uniform buffer.
+    // Position storage buffer.
     VkDescriptorSetLayoutBinding layoutBinding = {};
-    layoutBinding.binding = 5;
-    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    layoutBinding.binding = 0;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
     layoutBinding.descriptorCount = 1;
     layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     
@@ -301,9 +301,9 @@ void MaterialVulkan::createDescriptorSetLayouts() {
     
     descriptorSetLayouts.push_back(layout);
     
-    // Position storage buffer.
-    layoutBinding.binding = 0;
-    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+    // Transform uniform buffer.
+    layoutBinding.binding = 5;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     layoutBinding.descriptorCount = 1;
     layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     

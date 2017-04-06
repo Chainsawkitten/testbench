@@ -12,7 +12,7 @@ class ConstantBufferVulkan : public ConstantBuffer {
         void setData(const void* data, size_t size, Material* m, unsigned int location) final;
         void bind(Material* material) final;
         
-        VkDescriptorSet* getDescriptorSet() const;
+        VkDescriptorSet getDescriptorSet() const;
         uint32_t getOffset();
         
     private:

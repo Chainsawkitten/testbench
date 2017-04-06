@@ -50,6 +50,8 @@ void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage
 }
 
 void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location) {
+    this->location = location;
+    
     uint32_t minOffset = 32;
     paddedSize = size;
     if (paddedSize % minOffset != 0)
@@ -70,6 +72,8 @@ void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location)
     } else
         offsetMap[location]++;
     
+    this->offset = offsetMap[location];
+    
     // Copy data from data to mapped memory.
     void* mappedMemory;
     vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*paddedSize, size, 0, &mappedMemory);
@@ -83,6 +87,14 @@ void VertexBufferVulkan::unbind() {
 
 size_t VertexBufferVulkan::getSize() {
     return size_t(2000*3*3);
+}
+
+VkDescriptorSet VertexBufferVulkan::getDescriptorSet() const {
+    return descriptorSetMap[location];
+}
+
+uint32_t VertexBufferVulkan::getOffset() const {
+    return offset * paddedSize;
 }
 
 VkDeviceSize VertexBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory) {
