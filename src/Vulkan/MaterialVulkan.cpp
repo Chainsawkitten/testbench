@@ -209,6 +209,10 @@ VkPipelineLayout MaterialVulkan::getPipelineLayout() const {
     return pipelineLayout;
 }
 
+VkDescriptorSet MaterialVulkan::getDiffuseDescriptorSet() const {
+    return diffuseDescriptorSet;
+}
+
 int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     // Read shader file into string.
     std::string shaderText = readFile(shaderFileNames[type]);

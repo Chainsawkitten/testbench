@@ -240,6 +240,9 @@ void VulkanRenderer::frame() {
         descriptorSets.push_back(vertexBuffer->getDescriptorSet());
         offsets.push_back(vertexBuffer->getOffset());
         
+        // Diffuse buffer.
+        descriptorSets.push_back(material->getDiffuseDescriptorSet());
+        
         // Draw command.
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, descriptorSets.size(), descriptorSets.data(), offsets.size(), offsets.data());
         vkCmdDraw(commandBuffer, 3, 1, 0, 0);

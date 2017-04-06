@@ -25,6 +25,8 @@ class MaterialVulkan : public Material {
         VkPipeline getPipeline() const;
         VkPipelineLayout getPipelineLayout() const;
         
+        VkDescriptorSet getDiffuseDescriptorSet() const;
+        
     private:
         int compileShader(ShaderType type, std::string& errString);
         void createShaderModule(ShaderType type, const std::vector<char>& source);
