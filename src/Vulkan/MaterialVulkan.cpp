@@ -25,6 +25,9 @@ MaterialVulkan::MaterialVulkan(VkDevice device, VkPhysicalDevice physicalDevice,
 }
 
 MaterialVulkan::~MaterialVulkan() {
+    vkDestroyBuffer(device, diffuseBuffer, nullptr);
+    vkFreeMemory(device, diffuseBufferMemory, nullptr);
+    
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     
