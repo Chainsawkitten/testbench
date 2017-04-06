@@ -34,17 +34,22 @@ ConstantBufferVulkan::~ConstantBufferVulkan() {
 }
 
 void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, unsigned int location) {
+    uint32_t minOffset = 256;
+    paddedSize = size;
+    if (paddedSize % minOffset != 0)
+        paddedSize += minOffset - (paddedSize % minOffset);
+    
     if (offsetMap.find(location) == offsetMap.end() ) {
         offsetMap[location] = 0;
         
         // Create uniform buffer.
-        VkDeviceSize deviceSize = createBuffer(size * 2000, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &bufferMap[location], &memoryMap[location]);
+        createBuffer(paddedSize * 2000, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &bufferMap[location], &memoryMap[location]);
         
         // Create descriptor set layout.
         createDescriptorLayout();
         
         //  Create descriptor set.
-        createDescriptorSet(deviceSize);
+        createDescriptorSet(paddedSize);
     } else
         offsetMap[location]++;
     
@@ -53,7 +58,7 @@ void ConstantBufferVulkan::setData(const void* data, size_t size, Material* m, u
     
     // Copy data from data to mapped memory.
     void* mappedMemory;
-    vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*size, size, 0, &mappedMemory);
+    vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*paddedSize, size, 0, &mappedMemory);
     memcpy(mappedMemory, data, size);
     vkUnmapMemory(logicalDevice, memoryMap[location]);
 }
@@ -64,6 +69,15 @@ void ConstantBufferVulkan::bind(Material* material) {
 
 VkDescriptorSet* ConstantBufferVulkan::getDescriptorSet() const {
     return &descriptorSetMap[location];
+}
+
+uint32_t ConstantBufferVulkan::getOffset() {
+    offsetMap[location]++;
+    
+    if (offsetMap[location] == 2000)
+        offsetMap[location] = 0;
+    
+    return offsetMap[location] * paddedSize;
 }
 
 VkDeviceSize ConstantBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory) {
@@ -112,7 +126,7 @@ VkDeviceSize ConstantBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsage
 void ConstantBufferVulkan::createDescriptorLayout() {
     VkDescriptorSetLayoutBinding uniformLayoutBinding = {};
     uniformLayoutBinding.binding = location;
-    uniformLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uniformLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     uniformLayoutBinding.descriptorCount = 1;
     uniformLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uniformLayoutBinding.pImmutableSamplers = nullptr;
@@ -150,7 +164,7 @@ void ConstantBufferVulkan::createDescriptorSet(VkDeviceSize size) {
     descriptorWrite.dstSet = descriptorSetMap[location];
     descriptorWrite.dstBinding = location;
     descriptorWrite.dstArrayElement = 0;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     descriptorWrite.descriptorCount = 1;
     descriptorWrite.pBufferInfo = &bufferInfo;
     descriptorWrite.pImageInfo = nullptr;

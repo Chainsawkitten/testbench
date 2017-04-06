@@ -13,6 +13,7 @@ class ConstantBufferVulkan : public ConstantBuffer {
         void bind(Material* material) final;
         
         VkDescriptorSet* getDescriptorSet() const;
+        uint32_t getOffset();
         
     private:
         VkDeviceSize createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory);
@@ -24,6 +25,7 @@ class ConstantBufferVulkan : public ConstantBuffer {
         VkDescriptorPool descriptorPool;
         
         unsigned int location;
+        uint32_t paddedSize;
         static std::map<unsigned int, VkDescriptorSetLayout> layoutMap;
         static std::map<unsigned int, VkDescriptorSet> descriptorSetMap;
         static std::map<unsigned int, VkBuffer> bufferMap;

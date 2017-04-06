@@ -282,7 +282,7 @@ void MaterialVulkan::createDescriptorSetLayout(VkDescriptorSetLayout* descriptor
     // Describe layout binding.
     VkDescriptorSetLayoutBinding layoutBinding = {};
     layoutBinding.binding = 5;
-    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     layoutBinding.descriptorCount = 1;
     layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     
