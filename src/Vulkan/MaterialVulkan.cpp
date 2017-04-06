@@ -23,6 +23,8 @@ MaterialVulkan::MaterialVulkan(VkDevice device, VkPhysicalDevice physicalDevice,
     shaderStageFlags[ShaderType::GS] = VK_SHADER_STAGE_GEOMETRY_BIT;
     shaderStageFlags[ShaderType::PS] = VK_SHADER_STAGE_FRAGMENT_BIT;
     shaderStageFlags[ShaderType::CS] = VK_SHADER_STAGE_COMPUTE_BIT;
+    
+    createBuffer(sizeof(float) * 4, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &diffuseBuffer, &diffuseBufferMemory);
 }
 
 MaterialVulkan::~MaterialVulkan() {
@@ -188,8 +190,6 @@ void MaterialVulkan::setDiffuse(Color c) {
 }
 
 void MaterialVulkan::updateConstantBuffer(const void* data, size_t size, unsigned int location) {
-    createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &diffuseBuffer, &diffuseBufferMemory);
-    
     // Copy data from data to mapped memory.
     void* mappedMemory;
     vkMapMemory(device, diffuseBufferMemory, 0, size, 0, &mappedMemory);
@@ -353,7 +353,7 @@ void MaterialVulkan::createDescriptorSetLayouts() {
     
     // Diffuse uniform buffer.
     layoutBinding.binding = 6;
-    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     layoutBinding.descriptorCount = 1;
     layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     
@@ -379,6 +379,25 @@ void MaterialVulkan::createUniformDescriptorSet(VkDescriptorSetLayout layout) {
         std::cerr << "Failed to allocate descriptor set" << std::endl;
         exit(-1);
     }
+    
+    // Update descriptor set.
+    VkDescriptorBufferInfo bufferInfo = {};
+    bufferInfo.buffer = diffuseBuffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(float) * 4;
+    
+    VkWriteDescriptorSet descriptorWrite = {};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = diffuseDescriptorSet;
+    descriptorWrite.dstBinding = 6;
+    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrite.descriptorCount = 1;
+    descriptorWrite.pBufferInfo = &bufferInfo;
+    descriptorWrite.pImageInfo = nullptr;
+    descriptorWrite.pTexelBufferView = nullptr;
+    
+    vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 }
 
 void MaterialVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory) {
