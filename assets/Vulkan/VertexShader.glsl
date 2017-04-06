@@ -8,17 +8,12 @@
     layout(binding=TEXTCOORD) buffer text { vec2 uv_in[]; };
     layout(location=TEXTCOORD) out vec2 uv_out;
 #endif
-layout(binding=POSITION) buffer pos { vec4 position_in[]; };
+layout(binding=POSITION) buffer pos { vec4 position_in[]; };*/
 
 layout(binding=TRANSLATION) uniform TRANSLATION_NAME
 {
     vec4 translate;
 };
-
-layout(binding=DIFFUSE_TINT) uniform DIFFUSE_TINT_NAME
-{
-    vec4 diffuseTint;
-};*/
 
 void main() {
     vec4 positions[3];
@@ -36,7 +31,9 @@ void main() {
     
     gl_Position = position_in[gl_VertexIndex] + translate;*/
     
-    gl_Position = positions[gl_VertexIndex % 3];
+    gl_Position = positions[gl_VertexIndex % 3] + translate;
     
+    // OpenGL and Vulkan use different coordinate systems.
     gl_Position.y = -gl_Position.y;
+    gl_Position.z = -gl_Position.z;
 }
