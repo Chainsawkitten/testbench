@@ -215,10 +215,23 @@ void VulkanRenderer::frame() {
     // Draw meshes.
     for (Mesh* mesh : drawList) {
         MaterialVulkan* material = static_cast<MaterialVulkan*>(mesh->technique->material);
-        ConstantBufferVulkan* constantBuffer = static_cast<ConstantBufferVulkan*>(mesh->txBuffer);
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipeline());
-        uint32_t offset = constantBuffer->getOffset();
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, 1, constantBuffer->getDescriptorSet(), 1, &offset);
+        
+        std::vector<VkDescriptorSet> descriptorSets;
+        std::vector<uint32_t> offsets;
+        
+        // Position buffer.
+        VertexBufferVulkan* vertexBuffer = static_cast<VertexBufferVulkan*>(mesh->geometryBuffers[0].buffer);
+        descriptorSets.push_back(vertexBuffer->getDescriptorSet());
+        offsets.push_back(vertexBuffer->getOffset());
+        
+        // Transform buffer.
+        ConstantBufferVulkan* constantBuffer = static_cast<ConstantBufferVulkan*>(mesh->txBuffer);
+        descriptorSets.push_back(constantBuffer->getDescriptorSet());
+        offsets.push_back(constantBuffer->getOffset());
+        
+        // Draw command.
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, descriptorSets.size(), descriptorSets.data(), offsets.size(), offsets.data());
         vkCmdDraw(commandBuffer, 3, 1, 0, 0);
     }
     
@@ -648,7 +661,7 @@ void VulkanRenderer::createDescriptorPool() {
     
     // Storage buffers.
     poolSizes[1] = {};
-    poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
     poolSizes[1].descriptorCount = 3;
     
     // Create descriptor pool.

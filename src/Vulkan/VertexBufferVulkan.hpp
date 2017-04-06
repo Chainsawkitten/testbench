@@ -14,6 +14,9 @@ class VertexBufferVulkan : public VertexBuffer {
         void unbind() final;
         size_t getSize() final;
         
+        VkDescriptorSet getDescriptorSet() const;
+        uint32_t getOffset() const;
+        
     private:
         VkDeviceSize createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory);
         void createDescriptorLayout(uint32_t location);
@@ -23,6 +26,9 @@ class VertexBufferVulkan : public VertexBuffer {
         VkPhysicalDevice physicalDevice;
         VkDescriptorPool descriptorPool;
         
+        uint32_t paddedSize;
+        uint32_t offset;
+        unsigned int location;
         const void* tempData;
         static std::map<unsigned int, unsigned int> offsetMap;
         static std::map<unsigned int, VkDeviceMemory> memoryMap;

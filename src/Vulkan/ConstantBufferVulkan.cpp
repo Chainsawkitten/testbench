@@ -67,8 +67,8 @@ void ConstantBufferVulkan::bind(Material* material) {
     // Intentionally not implemented.
 }
 
-VkDescriptorSet* ConstantBufferVulkan::getDescriptorSet() const {
-    return &descriptorSetMap[location];
+VkDescriptorSet ConstantBufferVulkan::getDescriptorSet() const {
+    return descriptorSetMap[location];
 }
 
 uint32_t ConstantBufferVulkan::getOffset() {

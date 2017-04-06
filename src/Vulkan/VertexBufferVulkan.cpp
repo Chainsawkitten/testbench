@@ -50,24 +50,33 @@ void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage
 }
 
 void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location) {
+    this->location = location;
+    
+    uint32_t minOffset = 32;
+    paddedSize = size;
+    if (paddedSize % minOffset != 0)
+        paddedSize += minOffset - (paddedSize % minOffset);
+    
     // Incredibly crude and dodgy workaround incoming. Thanks Fransisco...
     if (offsetMap.find(location) == offsetMap.end() ) {
         offsetMap[location] = 0;
         
         // Create storage buffer.
-        createBuffer(size * 2000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &bufferMap[location], &memoryMap[location]);
+        createBuffer(paddedSize * 2000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &bufferMap[location], &memoryMap[location]);
         
         // Create descriptor set layout.
         createDescriptorLayout(location);
         
         // Create descriptor set.
-        createDescriptorSet(location, size * 2000);
+        createDescriptorSet(location, paddedSize);
     } else
         offsetMap[location]++;
     
+    this->offset = offsetMap[location];
+    
     // Copy data from data to mapped memory.
     void* mappedMemory;
-    vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*size, size, 0, &mappedMemory);
+    vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*paddedSize, size, 0, &mappedMemory);
     memcpy(mappedMemory, tempData, size);
     vkUnmapMemory(logicalDevice, memoryMap[location]);
 }
@@ -78,6 +87,14 @@ void VertexBufferVulkan::unbind() {
 
 size_t VertexBufferVulkan::getSize() {
     return size_t(2000*3*3);
+}
+
+VkDescriptorSet VertexBufferVulkan::getDescriptorSet() const {
+    return descriptorSetMap[location];
+}
+
+uint32_t VertexBufferVulkan::getOffset() const {
+    return offset * paddedSize;
 }
 
 VkDeviceSize VertexBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory) {
@@ -126,7 +143,7 @@ VkDeviceSize VertexBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFl
 void VertexBufferVulkan::createDescriptorLayout(uint32_t location) {
     VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
     vertexLayoutBinding.binding = location;
-    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
     vertexLayoutBinding.descriptorCount = 1;
     vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     vertexLayoutBinding.pImmutableSamplers = nullptr;
@@ -164,7 +181,7 @@ void VertexBufferVulkan::createDescriptorSet(uint32_t location, VkDeviceSize siz
     descriptorWrite.dstSet = descriptorSetMap[location];
     descriptorWrite.dstBinding = location;
     descriptorWrite.dstArrayElement = 0;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
     descriptorWrite.descriptorCount = 1;
     descriptorWrite.pBufferInfo = &bufferInfo;
     descriptorWrite.pImageInfo = nullptr;
