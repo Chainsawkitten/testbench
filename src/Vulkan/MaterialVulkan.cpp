@@ -28,7 +28,8 @@ MaterialVulkan::~MaterialVulkan() {
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     
     // Clean up descriptor set layouts.
-    vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+    for (VkDescriptorSetLayout layout : descriptorSetLayouts)
+        vkDestroyDescriptorSetLayout(device, layout, nullptr);
     
     // Clean up shader modules.
     for (auto& it : shaderModules)
@@ -129,13 +130,13 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
     colorBlending.pAttachments = &colorBlendAttachment;
     
     // Descriptor set layout.
-    createDescriptorSetLayout(&descriptorSetLayout);
+    createDescriptorSetLayouts();
     
     // Pipeline layout.
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+    pipelineLayoutInfo.setLayoutCount = descriptorSetLayouts.size();
+    pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
     
     if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         std::cerr << "Failed to create pipeline layout." << std::endl;
@@ -278,7 +279,9 @@ std::vector<char> MaterialVulkan::readFile2(const std::string& filename) {
     return buffer;
 }
 
-void MaterialVulkan::createDescriptorSetLayout(VkDescriptorSetLayout* descriptorSetLayout) {
+void MaterialVulkan::createDescriptorSetLayouts() {
+    VkDescriptorSetLayout layout;
+    
     // Describe layout binding.
     VkDescriptorSetLayoutBinding layoutBinding = {};
     layoutBinding.binding = 5;
@@ -292,8 +295,10 @@ void MaterialVulkan::createDescriptorSetLayout(VkDescriptorSetLayout* descriptor
     layoutInfo.bindingCount = 1;
     layoutInfo.pBindings = &layoutBinding;
     
-    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, descriptorSetLayout) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &layout) != VK_SUCCESS) {
         std::cerr << "Failed to create descriptor set layout." << std::endl;
         exit(-1);
     }
+    
+    descriptorSetLayouts.push_back(layout);
 }

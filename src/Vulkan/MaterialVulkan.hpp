@@ -31,7 +31,7 @@ class MaterialVulkan : public Material {
         VkPipelineShaderStageCreateInfo createShaderStage(ShaderType type);
         static std::string readFile(const std::string& filename);
         static std::vector<char> readFile2(const std::string& filename);
-        void createDescriptorSetLayout(VkDescriptorSetLayout* descriptorSetLayout);
+        void createDescriptorSetLayouts();
         
         VkDevice device;
         std::map<ShaderType, std::string> shaderExtensions;
@@ -41,5 +41,5 @@ class MaterialVulkan : public Material {
         VkRenderPass renderPass;
         VkPipelineLayout pipelineLayout;
         VkPipeline graphicsPipeline;
-        VkDescriptorSetLayout descriptorSetLayout;
+        std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
 };
