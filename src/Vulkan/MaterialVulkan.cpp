@@ -189,7 +189,11 @@ void MaterialVulkan::setDiffuse(Color c) {
 void MaterialVulkan::updateConstantBuffer(const void* data, size_t size, unsigned int location) {
     createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &diffuseBuffer, &diffuseBufferMemory);
     
-    /// @todo Transfer data.
+    // Copy data from data to mapped memory.
+    void* mappedMemory;
+    vkMapMemory(device, diffuseBufferMemory, 0, size, 0, &mappedMemory);
+    memcpy(mappedMemory, data, size);
+    vkUnmapMemory(device, diffuseBufferMemory);
 }
 
 void MaterialVulkan::addConstantBuffer(std::string name, unsigned int location) {
