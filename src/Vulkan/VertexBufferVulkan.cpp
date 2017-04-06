@@ -131,7 +131,7 @@ VkDeviceSize VertexBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFl
 void VertexBufferVulkan::createDescriptorLayout(uint32_t location) {
     VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
     vertexLayoutBinding.binding = location;
-    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
     vertexLayoutBinding.descriptorCount = 1;
     vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     vertexLayoutBinding.pImmutableSamplers = nullptr;
@@ -169,7 +169,7 @@ void VertexBufferVulkan::createDescriptorSet(uint32_t location, VkDeviceSize siz
     descriptorWrite.dstSet = descriptorSetMap[location];
     descriptorWrite.dstBinding = location;
     descriptorWrite.dstArrayElement = 0;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
     descriptorWrite.descriptorCount = 1;
     descriptorWrite.pBufferInfo = &bufferInfo;
     descriptorWrite.pImageInfo = nullptr;

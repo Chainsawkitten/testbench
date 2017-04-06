@@ -648,7 +648,7 @@ void VulkanRenderer::createDescriptorPool() {
     
     // Storage buffers.
     poolSizes[1] = {};
-    poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
     poolSizes[1].descriptorCount = 3;
     
     // Create descriptor pool.
