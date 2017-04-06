@@ -350,7 +350,7 @@ void MaterialVulkan::createDescriptorSetLayouts() {
     layoutBinding.binding = 6;
     layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     layoutBinding.descriptorCount = 1;
-    layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     
     if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &layout) != VK_SUCCESS) {
         std::cerr << "Failed to create descriptor set layout." << std::endl;
