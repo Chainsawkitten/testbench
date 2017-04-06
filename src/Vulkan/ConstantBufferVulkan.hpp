@@ -12,6 +12,8 @@ class ConstantBufferVulkan : public ConstantBuffer {
         void setData(const void* data, size_t size, Material* m, unsigned int location) final;
         void bind(Material* material) final;
         
+        VkDescriptorSet* getDescriptorSet() const;
+        
     private:
         VkDeviceSize createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory);
         void createDescriptorLayout();

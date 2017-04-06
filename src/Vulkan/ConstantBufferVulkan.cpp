@@ -62,6 +62,10 @@ void ConstantBufferVulkan::bind(Material* material) {
     // Intentionally not implemented.
 }
 
+VkDescriptorSet* ConstantBufferVulkan::getDescriptorSet() const {
+    return &descriptorSetMap[location];
+}
+
 VkDeviceSize ConstantBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory) {
     // Create buffer.
     VkBufferCreateInfo bufferInfo = {};

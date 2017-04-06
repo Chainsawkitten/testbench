@@ -193,6 +193,10 @@ VkPipeline MaterialVulkan::getPipeline() const {
     return graphicsPipeline;
 }
 
+VkPipelineLayout MaterialVulkan::getPipelineLayout() const {
+    return pipelineLayout;
+}
+
 int MaterialVulkan::compileShader(ShaderType type, std::string& errString) {
     // Read shader file into string.
     std::string shaderText = readFile(shaderFileNames[type]);

@@ -23,6 +23,7 @@ class MaterialVulkan : public Material {
         void addConstantBuffer(std::string name, unsigned int location) final;
         
         VkPipeline getPipeline() const;
+        VkPipelineLayout getPipelineLayout() const;
         
     private:
         int compileShader(ShaderType type, std::string& errString);

@@ -215,7 +215,9 @@ void VulkanRenderer::frame() {
     // Draw meshes.
     for (Mesh* mesh : drawList) {
         MaterialVulkan* material = static_cast<MaterialVulkan*>(mesh->technique->material);
+        ConstantBufferVulkan* constantBuffer = static_cast<ConstantBufferVulkan*>(mesh->txBuffer);
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipeline());
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, 1, constantBuffer->getDescriptorSet(), 0, nullptr);
         vkCmdDraw(commandBuffer, 3, 1, 0, 0);
     }
     
