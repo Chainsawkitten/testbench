@@ -11,13 +11,19 @@ class ConstantBufferVulkan : public ConstantBuffer {
         ~ConstantBufferVulkan() final;
         void setData(const void* data, size_t size, Material* m, unsigned int location) final;
         void bind(Material* material) final;
+        
     private:
+        VkDeviceSize createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory);
+        void createDescriptorLayout();
+        void createDescriptorSet(VkDeviceSize size);
+        
         VkDevice logicalDevice;
         VkPhysicalDevice physicalDevice;
         VkDescriptorPool descriptorPool;
         
         unsigned int location;
         static std::map<unsigned int, VkDescriptorSetLayout> layoutMap;
+        static std::map<unsigned int, VkDescriptorSet> descriptorSetMap;
         static std::map<unsigned int, VkBuffer> bufferMap;
         static std::map<unsigned int, VkDeviceMemory> memoryMap;
         static std::map<unsigned int, unsigned int> offsetMap;

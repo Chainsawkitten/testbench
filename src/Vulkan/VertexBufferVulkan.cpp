@@ -6,6 +6,7 @@ std::map<unsigned int, unsigned int> VertexBufferVulkan::offsetMap;
 std::map<unsigned int, VkDeviceMemory> VertexBufferVulkan::memoryMap;
 std::map<unsigned int, VkBuffer> VertexBufferVulkan::bufferMap;
 std::map<unsigned int, VkDescriptorSetLayout> VertexBufferVulkan::layoutMap;
+std::map<unsigned int, VkDescriptorSet> VertexBufferVulkan::descriptorSetMap;
 
 #define UNIMPLEMENTED {\
     std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
@@ -49,52 +50,18 @@ void VertexBufferVulkan::setData(const void* data, size_t size, DATA_USAGE usage
 }
 
 void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location) {
-    
     // Incredibly crude and dodgy workaround incoming. Thanks Fransisco...
     if (offsetMap.find(location) == offsetMap.end() ) {
-        VkBuffer newBuffer;
-        VkDeviceMemory newMemory;
-        VkDescriptorSetLayout newLayout;
+        offsetMap[location] = 0;
         
-        offsetMap.insert(std::make_pair(location, 0));
-        memoryMap.insert(std::make_pair(location, newMemory));
-        bufferMap.insert(std::make_pair(location, newBuffer));
-        layoutMap.insert(std::make_pair(location, newLayout));
+        // Create storage buffer.
+        createBuffer(size * 2000, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &bufferMap[location], &memoryMap[location]);
         
-        // Create vertex storage buffer.
-        VkBufferCreateInfo bufferInfo = {};
-        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = size*2000;
-        bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        // Create descriptor set layout.
+        createDescriptorLayout(location);
         
-        if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &bufferMap[location]) != VK_SUCCESS)
-            std::cerr << "Could not create vertex buffer!" << std::endl;
-        
-        // Get information about device memory.
-        VkMemoryRequirements memoryRequirements;
-        vkGetBufferMemoryRequirements(logicalDevice, bufferMap[location], &memoryRequirements);
-        
-        VkPhysicalDeviceMemoryProperties memoryProperties;
-        vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
-        
-        uint32_t memoryType;
-        
-        // Find suitable memory type.
-        int properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-        for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
-            if (memoryRequirements.memoryTypeBits & (1 << i) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties )
-                memoryType = i;
-        }
-        
-        VkMemoryAllocateInfo allocationInfo = {};
-        allocationInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocationInfo.allocationSize = memoryRequirements.size;
-        allocationInfo.memoryTypeIndex = memoryType;
-        
-        //Allocate memory on the device
-        if(vkAllocateMemory(logicalDevice, &allocationInfo, nullptr, &memoryMap[location]) != VK_SUCCESS)
-            std::cerr << "Could not allocate memory!" << std::endl;
+        // Create descriptor set.
+        createDescriptorSet(location, size * 2000);
     } else
         offsetMap[location]++;
     
@@ -103,26 +70,6 @@ void VertexBufferVulkan::bind(size_t offset, size_t size, unsigned int location)
     vkMapMemory(logicalDevice, memoryMap[location], offsetMap[location]*size, size, 0, &mappedMemory);
     memcpy(mappedMemory, tempData, size);
     vkUnmapMemory(logicalDevice, memoryMap[location]);
-    
-    if (offsetMap[location] == 1999)
-        vkBindBufferMemory(logicalDevice, bufferMap[location], memoryMap[location], 0);
-    
-    // Only create descriptor set layout if one doesn't exist for this location.
-    if (layoutMap.find(location) == layoutMap.end()) {
-        VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
-        vertexLayoutBinding.binding = location;
-        vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-        vertexLayoutBinding.pImmutableSamplers = nullptr;
-        
-        VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = 1;
-        layoutInfo.pBindings = &vertexLayoutBinding;
-        
-        if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &layoutMap[location]))
-            std::cerr << "Could not create descriptor set!" << std::endl;
-    }
 }
 
 void VertexBufferVulkan::unbind() {
@@ -131,4 +78,97 @@ void VertexBufferVulkan::unbind() {
 
 size_t VertexBufferVulkan::getSize() {
     return size_t(2000*3*3);
+}
+
+VkDeviceSize VertexBufferVulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer* buffer, VkDeviceMemory* bufferMemory) {
+    // Create buffer.
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    
+    if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, buffer) != VK_SUCCESS) {
+        std::cerr << "Failed to create buffer." << std::endl;
+        exit(-1);
+    }
+    
+    // Get information about device memory.
+    VkMemoryRequirements memoryRequirements;
+    vkGetBufferMemoryRequirements(logicalDevice, *buffer, &memoryRequirements);
+    
+    VkPhysicalDeviceMemoryProperties memoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
+    
+    // Find suitable memory type.
+    uint32_t memoryType;
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
+        if (memoryRequirements.memoryTypeBits & (1 << i) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties )
+            memoryType = i;
+    }
+    
+    // Allocate buffer memory.
+    VkMemoryAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.allocationSize = memoryRequirements.size;
+    allocateInfo.memoryTypeIndex = memoryType;
+    
+    if (vkAllocateMemory(logicalDevice, &allocateInfo, nullptr, bufferMemory) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate buffer memory." << std::endl;
+        exit(-1);
+    }
+    
+    vkBindBufferMemory(logicalDevice, *buffer, *bufferMemory, 0);
+    
+    return memoryRequirements.size;
+}
+
+void VertexBufferVulkan::createDescriptorLayout(uint32_t location) {
+    VkDescriptorSetLayoutBinding vertexLayoutBinding = {};
+    vertexLayoutBinding.binding = location;
+    vertexLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    vertexLayoutBinding.descriptorCount = 1;
+    vertexLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    vertexLayoutBinding.pImmutableSamplers = nullptr;
+    
+    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &vertexLayoutBinding;
+    
+    if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &layoutMap[location]))
+        std::cerr << "Could not create descriptor set!" << std::endl;
+}
+
+void VertexBufferVulkan::createDescriptorSet(uint32_t location, VkDeviceSize size) {
+    // Allocate descriptor set.
+    VkDescriptorSetAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = descriptorPool;
+    allocateInfo.descriptorSetCount = 1;
+    allocateInfo.pSetLayouts = &layoutMap[location];
+    
+    if (vkAllocateDescriptorSets(logicalDevice, &allocateInfo, &descriptorSetMap[location]) != VK_SUCCESS) {
+        std::cerr << "Failed to allocate descriptor set" << std::endl;
+        exit(-1);
+    }
+    
+    // Update descriptor set.
+    VkDescriptorBufferInfo bufferInfo = {};
+    bufferInfo.buffer = bufferMap[location];
+    bufferInfo.offset = 0;
+    bufferInfo.range = size;
+    
+    VkWriteDescriptorSet descriptorWrite = {};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = descriptorSetMap[location];
+    descriptorWrite.dstBinding = location;
+    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    descriptorWrite.descriptorCount = 1;
+    descriptorWrite.pBufferInfo = &bufferInfo;
+    descriptorWrite.pImageInfo = nullptr;
+    descriptorWrite.pTexelBufferView = nullptr;
+    
+    vkUpdateDescriptorSets(logicalDevice, 1, &descriptorWrite, 0, nullptr);
 }
