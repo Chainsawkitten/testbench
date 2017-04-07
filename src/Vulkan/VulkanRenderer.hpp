@@ -82,6 +82,10 @@ class VulkanRenderer : public Renderer {
         VkDescriptorPool descriptorPool;
         VkClearValue clearColor;
         
+        VkImage depthImage;
+        VkDeviceMemory depthImageMemory;
+        VkImageView depthImageView;
+
         // Current swap chain index to render to.
         uint32_t imageIndex;
         VkFence fence;
