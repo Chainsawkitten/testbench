@@ -2,10 +2,6 @@
 
 #include <iostream>
 
-#define UNIMPLEMENTED {\
-    std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
-    }
-
 std::map<unsigned int, unsigned int> ConstantBufferVulkan::offsetMap;
 std::map<unsigned int, VkDeviceMemory> ConstantBufferVulkan::memoryMap;
 std::map<unsigned int, VkBuffer> ConstantBufferVulkan::bufferMap;
