@@ -113,6 +113,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     VkFormat format = createSwapChain(width, height);
     createImageViews(format);
     
+    // Create depth buffer.
+    createDepthBuffer();
+    
     // Create render pass.
     createRenderPass(format);
     
