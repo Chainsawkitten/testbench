@@ -7,7 +7,7 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
-bool MaterialVulkan::firstMaterial = true;
+int MaterialVulkan::materialIndex = 0;
 
 MaterialVulkan::MaterialVulkan(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D swapChainExtent, VkRenderPass renderPass, VkDescriptorPool descriptorPool) {
     this->device = device;
@@ -115,9 +115,8 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    if (firstMaterial) {
-        rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
-        firstMaterial = false;
+    if (materialIndex++ < 2) {
+        rasterizer.polygonMode = VK_POLYGON_MODE_POINT;
     } else {
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     }

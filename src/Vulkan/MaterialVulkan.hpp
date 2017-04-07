@@ -53,5 +53,5 @@ class MaterialVulkan : public Material {
         VkDeviceMemory diffuseBufferMemory;
         VkDescriptorSet diffuseDescriptorSet;
         
-        static bool firstMaterial;
+        static int materialIndex;
 };
