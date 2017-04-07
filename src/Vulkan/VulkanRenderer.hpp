@@ -53,6 +53,10 @@ class VulkanRenderer : public Renderer {
         void createCommandPool();
         void createCommandBuffer();
         void createDescriptorPool();
+        void createDepthBuffer();
+        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        VkCommandBuffer beginSingleTimeCommands();
+        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
         
         std::vector<Mesh*> drawList;
         
