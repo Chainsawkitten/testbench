@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <stb_image.h>
+#include "Sampler2DVulkan.hpp"
 
 #define UNIMPLEMENTED {\
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
@@ -115,7 +116,24 @@ VkDescriptorSet Texture2DVulkan::getDescriptorSet() {
             exit(-1);
         }
         
-        /// @todo Update descriptor set.
+        // Update descriptor set.
+        VkDescriptorImageInfo imageInfo = {};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = textureImageView;
+        imageInfo.sampler = static_cast<Sampler2DVulkan*>(sampler)->getTextureSampler();
+        
+        VkWriteDescriptorSet descriptorWrite = {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSet;
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = nullptr;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.pTexelBufferView = nullptr;
+        
+        vkUpdateDescriptorSets(logicalDevice, 1, &descriptorWrite, 0, nullptr);
         
         descriptorSetCreated = true;
     }

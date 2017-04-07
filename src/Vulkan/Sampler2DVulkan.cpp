@@ -44,3 +44,7 @@ void Sampler2DVulkan::setMinFilter(FILTER filter) {
 void Sampler2DVulkan::setWrap(WRAPPING s, WRAPPING t) {
     // Intentionally left unimplemented.
 }
+
+VkSampler Sampler2DVulkan::getTextureSampler() const {
+    return textureSampler;
+}

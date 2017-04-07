@@ -11,6 +11,8 @@ class Sampler2DVulkan : public Sampler2D {
         void setMinFilter(FILTER filter) final;
         void setWrap(WRAPPING s, WRAPPING t) final;
         
+        VkSampler getTextureSampler() const;
+        
     private:
         VkDevice device;
         VkSampler textureSampler;
