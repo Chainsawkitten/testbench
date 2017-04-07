@@ -159,8 +159,12 @@ int VulkanRenderer::shutdown() {
     
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
     
+    vkDestroyImageView(logicalDevice, depthImageView, nullptr);
     for (VkImageView& imageView : swapChainImageViews)
         vkDestroyImageView(logicalDevice, imageView, nullptr);
+    
+    vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
+    vkDestroyImage(logicalDevice, depthImage, nullptr);
     
     //vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr); -- Uncommenting this causes segmentation fault.
     vkDestroyDevice(logicalDevice, nullptr);
