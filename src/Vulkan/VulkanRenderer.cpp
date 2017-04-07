@@ -243,6 +243,12 @@ void VulkanRenderer::frame() {
         // Diffuse buffer.
         descriptorSets.push_back(material->getDiffuseDescriptorSet());
         
+        // Texture.
+        if (mesh->textures[0] != nullptr) {
+            Texture2DVulkan* texture = static_cast<Texture2DVulkan*>(mesh->textures[0]);
+            descriptorSets.push_back(texture->getDescriptorSet());
+        }
+        
         // Draw command.
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, descriptorSets.size(), descriptorSets.data(), offsets.size(), offsets.data());
         vkCmdDraw(commandBuffer, 3, 1, 0, 0);
