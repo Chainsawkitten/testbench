@@ -123,6 +123,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     createCommandPool();
     createCommandBuffer();
     
+    // Transition depth buffer layout.
+    transitionImageLayout(depthImage, VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    
     // Create descriptor pool.
     createDescriptorPool();
     
