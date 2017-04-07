@@ -5,7 +5,7 @@
 
 class Texture2DVulkan : public Texture2D {
     public:
-        Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue);
+        Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue, VkDescriptorPool descriptorPool);
         ~Texture2DVulkan() final;
         
         int loadFromFile(std::string filename) final;
@@ -26,6 +26,7 @@ class Texture2DVulkan : public Texture2D {
         VkPhysicalDevice physicalDevice;
         VkCommandPool commandPool;
         VkQueue graphicsQueue;
+        VkDescriptorPool descriptorPool;
         
         VkImage stagingImage;
         VkDeviceMemory stagingImageMemory;

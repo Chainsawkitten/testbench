@@ -7,11 +7,12 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
-Texture2DVulkan::Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue) {
+Texture2DVulkan::Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue, VkDescriptorPool descriptorPool) {
     this->logicalDevice = logicalDevice;
     this->physicalDevice = physicalDevice;
     this->commandPool = commandPool;
     this->graphicsQueue = graphicsQueue;
+    this->descriptorPool = descriptorPool;
 }
 
 Texture2DVulkan::~Texture2DVulkan() {
