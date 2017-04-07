@@ -18,8 +18,8 @@
 #include "VertexBufferVulkan.hpp"
 
 #define UNIMPLEMENTED {\
-std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
-}
+    std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
+    }
 
 #ifndef NDEBUG
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj, size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData) {
@@ -33,8 +33,9 @@ VulkanRenderer::VulkanRenderer() {
     
 }
 
-VulkanRenderer::~VulkanRenderer() {
 
+VulkanRenderer::~VulkanRenderer() {
+    
 }
 
 Mesh* VulkanRenderer::makeMesh() { 
@@ -113,6 +114,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     VkFormat format = createSwapChain(width, height);
     createImageViews(format);
     
+    // Create depth buffer.
+    createDepthBuffer();
+    
     // Create render pass.
     createRenderPass(format);
     
@@ -122,6 +126,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     // Create command buffer.
     createCommandPool();
     createCommandBuffer();
+    
+    // Transition depth buffer layout.
+    transitionImageLayout(depthImage, VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     
     // Create descriptor pool.
     createDescriptorPool();
@@ -136,7 +143,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     fenceInfo.flags = 0;
     
     vkCreateFence(logicalDevice, &fenceInfo, nullptr, &fence);
-
+    
     return 0;
 }
 
@@ -152,8 +159,12 @@ int VulkanRenderer::shutdown() {
     
     vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
     
+    vkDestroyImageView(logicalDevice, depthImageView, nullptr);
     for (VkImageView& imageView : swapChainImageViews)
         vkDestroyImageView(logicalDevice, imageView, nullptr);
+    
+    vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
+    vkDestroyImage(logicalDevice, depthImage, nullptr);
     
     //vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr); -- Uncommenting this causes segmentation fault.
     vkDestroyDevice(logicalDevice, nullptr);
@@ -207,8 +218,11 @@ void VulkanRenderer::frame() {
     renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = swapChainExtent;
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+    VkClearValue clearValues[2] = {};
+    clearValues[0] = clearColor;
+    clearValues[1].depthStencil.depth = 1.0f;
+    renderPassInfo.clearValueCount = 2;
+    renderPassInfo.pClearValues = clearValues;
     
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     
@@ -368,7 +382,7 @@ void VulkanRenderer::createDevice() {
         VkPhysicalDeviceFeatures deviceFeatures;
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
         vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
+        
         // Checking for discrete (dedicated) GPU.
         /// @todo Check for actually necessary GPU features.
         // Maybe: Wrap this in a function that takes as argument the things we are looking for.
@@ -493,7 +507,7 @@ VkExtent2D VulkanRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capa
         
         actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
         actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
-    
+        
         return actualExtent;
     }
 }
@@ -545,9 +559,9 @@ VkFormat VulkanRenderer::createSwapChain(unsigned int width, unsigned int height
 void VulkanRenderer::createSemaphores() {
     VkSemaphoreCreateInfo semaphoreInfo = {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
+    
     if (   vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
-            vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS )
+           vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS )
         std::cout << "Couldn't create semaphores" << std::endl;
 }
 
@@ -578,7 +592,7 @@ void VulkanRenderer::createImageViews(VkFormat format) {
 }
 
 void VulkanRenderer::createRenderPass(VkFormat format) {
-
+    
     VkSubpassDependency dependency = {};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -586,7 +600,7 @@ void VulkanRenderer::createRenderPass(VkFormat format) {
     dependency.dstSubpass = 0;
     dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
+    
     // We use a single color buffer.
     VkAttachmentDescription colorAttachment = {};
     colorAttachment.format = format;
@@ -598,21 +612,41 @@ void VulkanRenderer::createRenderPass(VkFormat format) {
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     
+    // Depth attachment.
+    VkAttachmentDescription depthAttachment = {};
+    depthAttachment.format = VK_FORMAT_D32_SFLOAT;
+    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    
     // Subpasses.
+    // Color.
     VkAttachmentReference colorAttachmentRef = {};
     colorAttachmentRef.attachment = 0;
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    
+    // Depth attchment reference.
+    VkAttachmentReference depthAttachmentRef = {};
+    depthAttachmentRef.attachment = 1;
+    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
+    subpass.pDepthStencilAttachment = &depthAttachmentRef;
+    
+    VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
     
     // Create render pass.
     VkRenderPassCreateInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
+    renderPassInfo.attachmentCount = 2;
+    renderPassInfo.pAttachments = attachments;
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
     renderPassInfo.dependencyCount = 1;
@@ -628,12 +662,12 @@ void VulkanRenderer::createFramebuffers() {
     swapChainFramebuffers.resize(swapChainImageViews.size());
     
     for (std::size_t i = 0; i < swapChainImageViews.size(); ++i) {
-        VkImageView attachments[] = {swapChainImageViews[i]};
+        VkImageView attachments[] = {swapChainImageViews[i], depthImageView};
         
         VkFramebufferCreateInfo framebufferInfo = {};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = renderPass;
-        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.attachmentCount = 2;
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = swapChainExtent.width;
         framebufferInfo.height = swapChainExtent.height;
@@ -705,4 +739,136 @@ void VulkanRenderer::createDescriptorPool() {
         std::cerr << "Failed to create descriptor pool." << std::endl;
         exit(-1);
     }
+}
+
+void VulkanRenderer::createDepthBuffer() {
+    VkImageCreateInfo depthImageInfo = {};
+    depthImageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    depthImageInfo.imageType = VK_IMAGE_TYPE_2D;
+    depthImageInfo.extent.width = swapChainExtent.width;
+    depthImageInfo.extent.height = swapChainExtent.height;
+    depthImageInfo.extent.depth = 1;
+    depthImageInfo.mipLevels = 1;
+    depthImageInfo.arrayLayers = 1;
+    depthImageInfo.format = VK_FORMAT_D32_SFLOAT;
+    depthImageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    depthImageInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
+    depthImageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    depthImageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    depthImageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    
+    if (vkCreateImage(logicalDevice, &depthImageInfo, nullptr, &depthImage) != VK_SUCCESS)
+        std::cout << "Failed to create image.\n";
+    
+    VkMemoryRequirements depthMemoryRequirements;
+    vkGetImageMemoryRequirements(logicalDevice, depthImage, &depthMemoryRequirements);
+    
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+    
+    uint32_t typeFilter = depthMemoryRequirements.memoryTypeBits;
+    
+    uint32_t foundMemoryType;
+    
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+            foundMemoryType = i;
+        }
+    }
+    
+    VkMemoryAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = depthMemoryRequirements.size;
+    allocInfo.memoryTypeIndex = foundMemoryType;
+    
+    if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &depthImageMemory))
+        std::cout << "Could not allocate memory.\n";
+    
+    vkBindImageMemory(logicalDevice, depthImage, depthImageMemory, 0);
+    
+    VkImageViewCreateInfo viewInfo = {};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = depthImage;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = VK_FORMAT_D32_SFLOAT;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+    
+    if(vkCreateImageView(logicalDevice, &viewInfo, nullptr, &depthImageView) != VK_SUCCESS)
+        std::cout << "Could not create imageview.\n";
+}
+
+void VulkanRenderer::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    
+    VkImageMemoryBarrier barrier = {};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    
+    if (oldLayout == VK_IMAGE_LAYOUT_PREINITIALIZED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    } else if (oldLayout == VK_IMAGE_LAYOUT_PREINITIALIZED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    } else {
+        std::cerr << "Unsupported layout transition!" << std::endl;
+        exit(-1);
+    }
+    
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+    
+    endSingleTimeCommands(commandBuffer);
+}
+
+VkCommandBuffer VulkanRenderer::beginSingleTimeCommands() {
+    VkCommandBufferAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocateInfo.commandPool = commandPool;
+    allocateInfo.commandBufferCount = 1;
+    
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(logicalDevice, &allocateInfo, &commandBuffer);
+    
+    VkCommandBufferBeginInfo beginInfo = {};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    
+    return commandBuffer;
+}
+
+void VulkanRenderer::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+    vkEndCommandBuffer(commandBuffer);
+    
+    VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+    
+    vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(graphicsQueue);
+    
+    vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
 }

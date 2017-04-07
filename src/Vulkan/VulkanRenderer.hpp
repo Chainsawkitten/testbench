@@ -53,6 +53,10 @@ class VulkanRenderer : public Renderer {
         void createCommandPool();
         void createCommandBuffer();
         void createDescriptorPool();
+        void createDepthBuffer();
+        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        VkCommandBuffer beginSingleTimeCommands();
+        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
         
         std::vector<Mesh*> drawList;
         
@@ -82,6 +86,10 @@ class VulkanRenderer : public Renderer {
         VkDescriptorPool descriptorPool;
         VkClearValue clearColor;
         
+        VkImage depthImage;
+        VkDeviceMemory depthImageMemory;
+        VkImageView depthImageView;
+
         // Current swap chain index to render to.
         uint32_t imageIndex;
         VkFence fence;
