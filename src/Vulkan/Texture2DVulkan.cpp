@@ -84,7 +84,23 @@ void Texture2DVulkan::bind(unsigned int slot) {
 
 VkDescriptorSet Texture2DVulkan::getDescriptorSet() {
     if (!descriptorSetCreated) {
-        /// @todo Create descriptor set.
+        // Create descriptor set layout.
+        VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
+        samplerLayoutBinding.binding = 0;
+        samplerLayoutBinding.descriptorCount = 1;
+        samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        samplerLayoutBinding.pImmutableSamplers = nullptr;
+        samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        
+        VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = 1;
+        layoutInfo.pBindings = &samplerLayoutBinding;
+        
+        if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout))
+            std::cerr << "Could not create descriptor set layout!" << std::endl;
+        
+        /// @todo Allocate descriptor set.
         
         descriptorSetCreated = true;
     }
