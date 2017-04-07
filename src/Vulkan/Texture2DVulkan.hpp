@@ -11,6 +11,8 @@ class Texture2DVulkan : public Texture2D {
         int loadFromFile(std::string filename) final;
         void bind(unsigned int slot) final;
         
+        VkDescriptorSet getDescriptorSet();
+        
     private:
         void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage* image, VkDeviceMemory* imageMemory);
         uint32_t findMemoryType(uint32_t memoryTypeBits, VkMemoryPropertyFlags properties);
@@ -32,4 +34,8 @@ class Texture2DVulkan : public Texture2D {
         VkDeviceMemory textureImageMemory;
         
         VkImageView textureImageView;
+        
+        bool descriptorSetCreated = false;
+        VkDescriptorSetLayout descriptorSetLayout;
+        VkDescriptorSet descriptorSet;
 };

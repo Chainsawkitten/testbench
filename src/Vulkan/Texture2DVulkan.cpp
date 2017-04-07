@@ -82,6 +82,16 @@ void Texture2DVulkan::bind(unsigned int slot) {
     UNIMPLEMENTED
 }
 
+VkDescriptorSet Texture2DVulkan::getDescriptorSet() {
+    if (!descriptorSetCreated) {
+        /// @todo Create descriptor set.
+        
+        descriptorSetCreated = true;
+    }
+    
+    return descriptorSet;
+}
+
 void Texture2DVulkan::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage* image, VkDeviceMemory* imageMemory) {
     // Create image.
     VkImageCreateInfo imageInfo = {};
