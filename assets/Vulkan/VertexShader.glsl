@@ -28,5 +28,5 @@ void main() {
     
     // OpenGL and Vulkan use different coordinate systems.
     gl_Position.y = -gl_Position.y;
-	gl_Position.z = gl_Position.z + 0.2;
+    gl_Position.z = gl_Position.z + 0.2;
 }
