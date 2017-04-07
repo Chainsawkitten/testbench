@@ -115,8 +115,8 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    if (materialIndex++ < 2) {
-        rasterizer.polygonMode = VK_POLYGON_MODE_POINT;
+    if (materialIndex++ < 1) {
+        rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
     } else {
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     }
