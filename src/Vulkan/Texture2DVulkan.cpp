@@ -103,7 +103,19 @@ VkDescriptorSet Texture2DVulkan::getDescriptorSet() {
         if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout))
             std::cerr << "Could not create descriptor set layout!" << std::endl;
         
-        /// @todo Allocate descriptor set.
+        // Allocate descriptor set.
+        VkDescriptorSetAllocateInfo allocateInfo = {};
+        allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocateInfo.descriptorPool = descriptorPool;
+        allocateInfo.descriptorSetCount = 1;
+        allocateInfo.pSetLayouts = &descriptorSetLayout;
+        
+        if (vkAllocateDescriptorSets(logicalDevice, &allocateInfo, &descriptorSet) != VK_SUCCESS) {
+            std::cerr << "Failed to allocate descriptor set" << std::endl;
+            exit(-1);
+        }
+        
+        /// @todo Update descriptor set.
         
         descriptorSetCreated = true;
     }
