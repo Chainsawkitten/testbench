@@ -42,7 +42,7 @@ Mesh* VulkanRenderer::makeMesh() {
 }
 
 Texture2D* VulkanRenderer::makeTexture2D() {
-    return new Texture2DVulkan(logicalDevice, physicalDevice, commandPool, graphicsQueue);
+    return new Texture2DVulkan(logicalDevice, physicalDevice, commandPool, graphicsQueue, descriptorPool);
 }
 
 Sampler2D* VulkanRenderer::makeSampler2D() {
@@ -242,6 +242,12 @@ void VulkanRenderer::frame() {
         
         // Diffuse buffer.
         descriptorSets.push_back(material->getDiffuseDescriptorSet());
+        
+        // Texture.
+        if (mesh->textures[0] != nullptr) {
+            Texture2DVulkan* texture = static_cast<Texture2DVulkan*>(mesh->textures[0]);
+            descriptorSets.push_back(texture->getDescriptorSet());
+        }
         
         // Draw command.
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, descriptorSets.size(), descriptorSets.data(), offsets.size(), offsets.data());
@@ -666,7 +672,7 @@ void VulkanRenderer::createCommandBuffer() {
 }
 
 void VulkanRenderer::createDescriptorPool() {
-    VkDescriptorPoolSize poolSizes[3];
+    VkDescriptorPoolSize poolSizes[4];
     
     // Uniform buffers.
     poolSizes[0] = {};
@@ -683,12 +689,17 @@ void VulkanRenderer::createDescriptorPool() {
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
     poolSizes[2].descriptorCount = 3;
     
+    // Samplers.
+    poolSizes[3] = {};
+    poolSizes[3].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizes[3].descriptorCount = 1;
+    
     // Create descriptor pool.
     VkDescriptorPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 3;
+    poolInfo.poolSizeCount = 4;
     poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = 7;
+    poolInfo.maxSets = 8;
     
     if (vkCreateDescriptorPool(logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         std::cerr << "Failed to create descriptor pool." << std::endl;

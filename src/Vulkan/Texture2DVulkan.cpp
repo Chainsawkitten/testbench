@@ -2,19 +2,23 @@
 
 #include <iostream>
 #include <stb_image.h>
+#include "Sampler2DVulkan.hpp"
 
 #define UNIMPLEMENTED {\
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
-Texture2DVulkan::Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue) {
+Texture2DVulkan::Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue, VkDescriptorPool descriptorPool) {
     this->logicalDevice = logicalDevice;
     this->physicalDevice = physicalDevice;
     this->commandPool = commandPool;
     this->graphicsQueue = graphicsQueue;
+    this->descriptorPool = descriptorPool;
 }
 
 Texture2DVulkan::~Texture2DVulkan() {
+    vkDestroyDescriptorSetLayout(logicalDevice, descriptorSetLayout, nullptr);
+    
     vkDestroyImageView(logicalDevice, textureImageView, nullptr);
     
     vkFreeMemory(logicalDevice, stagingImageMemory, nullptr);
@@ -80,6 +84,61 @@ int Texture2DVulkan::loadFromFile(std::string filename) {
 
 void Texture2DVulkan::bind(unsigned int slot) {
     UNIMPLEMENTED
+}
+
+VkDescriptorSet Texture2DVulkan::getDescriptorSet() {
+    if (!descriptorSetCreated) {
+        // Create descriptor set layout.
+        VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
+        samplerLayoutBinding.binding = 0;
+        samplerLayoutBinding.descriptorCount = 1;
+        samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        samplerLayoutBinding.pImmutableSamplers = nullptr;
+        samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        
+        VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = 1;
+        layoutInfo.pBindings = &samplerLayoutBinding;
+        
+        if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout))
+            std::cerr << "Could not create descriptor set layout!" << std::endl;
+        
+        // Allocate descriptor set.
+        VkDescriptorSetAllocateInfo allocateInfo = {};
+        allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocateInfo.descriptorPool = descriptorPool;
+        allocateInfo.descriptorSetCount = 1;
+        allocateInfo.pSetLayouts = &descriptorSetLayout;
+        
+        if (vkAllocateDescriptorSets(logicalDevice, &allocateInfo, &descriptorSet) != VK_SUCCESS) {
+            std::cerr << "Failed to allocate descriptor set" << std::endl;
+            exit(-1);
+        }
+        
+        // Update descriptor set.
+        VkDescriptorImageInfo imageInfo = {};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = textureImageView;
+        imageInfo.sampler = static_cast<Sampler2DVulkan*>(sampler)->getTextureSampler();
+        
+        VkWriteDescriptorSet descriptorWrite = {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSet;
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = nullptr;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.pTexelBufferView = nullptr;
+        
+        vkUpdateDescriptorSets(logicalDevice, 1, &descriptorWrite, 0, nullptr);
+        
+        descriptorSetCreated = true;
+    }
+    
+    return descriptorSet;
 }
 
 void Texture2DVulkan::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage* image, VkDeviceMemory* imageMemory) {

@@ -5,11 +5,13 @@
 
 class Texture2DVulkan : public Texture2D {
     public:
-        Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue);
+        Texture2DVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue, VkDescriptorPool descriptorPool);
         ~Texture2DVulkan() final;
         
         int loadFromFile(std::string filename) final;
         void bind(unsigned int slot) final;
+        
+        VkDescriptorSet getDescriptorSet();
         
     private:
         void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage* image, VkDeviceMemory* imageMemory);
@@ -24,6 +26,7 @@ class Texture2DVulkan : public Texture2D {
         VkPhysicalDevice physicalDevice;
         VkCommandPool commandPool;
         VkQueue graphicsQueue;
+        VkDescriptorPool descriptorPool;
         
         VkImage stagingImage;
         VkDeviceMemory stagingImageMemory;
@@ -32,4 +35,8 @@ class Texture2DVulkan : public Texture2D {
         VkDeviceMemory textureImageMemory;
         
         VkImageView textureImageView;
+        
+        bool descriptorSetCreated = false;
+        VkDescriptorSetLayout descriptorSetLayout;
+        VkDescriptorSet descriptorSet;
 };

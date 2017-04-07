@@ -8,10 +8,6 @@ std::map<unsigned int, VkBuffer> VertexBufferVulkan::bufferMap;
 std::map<unsigned int, VkDescriptorSetLayout> VertexBufferVulkan::layoutMap;
 std::map<unsigned int, VkDescriptorSet> VertexBufferVulkan::descriptorSetMap;
 
-#define UNIMPLEMENTED {\
-    std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
-    }
-
 VertexBufferVulkan::VertexBufferVulkan(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkDescriptorPool descriptorPool) {
     this->physicalDevice = physicalDevice;
     this->logicalDevice = logicalDevice;
@@ -154,7 +150,7 @@ void VertexBufferVulkan::createDescriptorLayout(uint32_t location) {
     layoutInfo.pBindings = &vertexLayoutBinding;
     
     if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &layoutMap[location]))
-        std::cerr << "Could not create descriptor set!" << std::endl;
+        std::cerr << "Could not create descriptor set layout!" << std::endl;
 }
 
 void VertexBufferVulkan::createDescriptorSet(uint32_t location, VkDeviceSize size) {

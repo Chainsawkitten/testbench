@@ -7,7 +7,7 @@
 std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
 }
 
-bool MaterialVulkan::firstMaterial = true;
+int MaterialVulkan::materialIndex = 0;
 
 MaterialVulkan::MaterialVulkan(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D swapChainExtent, VkRenderPass renderPass, VkDescriptorPool descriptorPool) {
     this->device = device;
@@ -115,9 +115,8 @@ int MaterialVulkan::compileMaterial(std::string& errString) {
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    if (firstMaterial) {
+    if (materialIndex++ < 1) {
         rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
-        firstMaterial = false;
     } else {
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     }
@@ -376,6 +375,21 @@ void MaterialVulkan::createDescriptorSetLayouts() {
     descriptorSetLayouts.push_back(layout);
     
     createUniformDescriptorSet(layout);
+    
+    // Texture.
+    if (materialIndex == 3) {
+        layoutBinding.binding = 0;
+        layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        layoutBinding.descriptorCount = 1;
+        layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        
+        if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &layout) != VK_SUCCESS) {
+            std::cerr << "Failed to create descriptor set layout." << std::endl;
+            exit(-1);
+        }
+        
+        descriptorSetLayouts.push_back(layout);
+    }
 }
 
 void MaterialVulkan::createUniformDescriptorSet(VkDescriptorSetLayout layout) {

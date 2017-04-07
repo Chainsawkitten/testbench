@@ -2,10 +2,6 @@
 
 #include <iostream>
 
-#define UNIMPLEMENTED {\
-    std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
-    }
-
 std::map<unsigned int, unsigned int> ConstantBufferVulkan::offsetMap;
 std::map<unsigned int, VkDeviceMemory> ConstantBufferVulkan::memoryMap;
 std::map<unsigned int, VkBuffer> ConstantBufferVulkan::bufferMap;
@@ -137,7 +133,7 @@ void ConstantBufferVulkan::createDescriptorLayout() {
     layoutInfo.pBindings = &uniformLayoutBinding;
     
     if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &layoutMap[location]))
-        std::cerr << "Could not create descriptor set!" << std::endl;
+        std::cerr << "Could not create descriptor set layout!" << std::endl;
 }
 
 void ConstantBufferVulkan::createDescriptorSet(VkDeviceSize size) {
