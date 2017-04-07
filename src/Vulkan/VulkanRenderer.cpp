@@ -18,8 +18,8 @@
 #include "VertexBufferVulkan.hpp"
 
 #define UNIMPLEMENTED {\
-std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
-}
+    std::cout << "Unimplemented method in: " << __FILE__ << ":" << __LINE__ << std::endl;\
+    }
 
 #ifndef NDEBUG
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj, size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData) {
@@ -33,8 +33,9 @@ VulkanRenderer::VulkanRenderer() {
     
 }
 
-VulkanRenderer::~VulkanRenderer() {
 
+VulkanRenderer::~VulkanRenderer() {
+    
 }
 
 Mesh* VulkanRenderer::makeMesh() { 
@@ -142,7 +143,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height) {
     fenceInfo.flags = 0;
     
     vkCreateFence(logicalDevice, &fenceInfo, nullptr, &fence);
-
+    
     return 0;
 }
 
@@ -374,7 +375,7 @@ void VulkanRenderer::createDevice() {
         VkPhysicalDeviceFeatures deviceFeatures;
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
         vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
+        
         // Checking for discrete (dedicated) GPU.
         /// @todo Check for actually necessary GPU features.
         // Maybe: Wrap this in a function that takes as argument the things we are looking for.
@@ -499,7 +500,7 @@ VkExtent2D VulkanRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capa
         
         actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
         actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
-    
+        
         return actualExtent;
     }
 }
@@ -584,7 +585,7 @@ void VulkanRenderer::createImageViews(VkFormat format) {
 }
 
 void VulkanRenderer::createRenderPass(VkFormat format) {
-
+    
     VkSubpassDependency dependency = {};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -592,7 +593,7 @@ void VulkanRenderer::createRenderPass(VkFormat format) {
     dependency.dstSubpass = 0;
     dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
+    
     // We use a single color buffer.
     VkAttachmentDescription colorAttachment = {};
     colorAttachment.format = format;
