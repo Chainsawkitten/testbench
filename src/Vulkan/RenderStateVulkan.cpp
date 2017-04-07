@@ -18,5 +18,5 @@ void RenderStateVulkan::set() {
 }
 
 void RenderStateVulkan::setWireFrame(bool wireframe) {
-    UNIMPLEMENTED
+    // Intentionally left unimplemented.
 }
