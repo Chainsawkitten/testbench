@@ -662,12 +662,12 @@ void VulkanRenderer::createFramebuffers() {
     swapChainFramebuffers.resize(swapChainImageViews.size());
     
     for (std::size_t i = 0; i < swapChainImageViews.size(); ++i) {
-        VkImageView attachments[] = {swapChainImageViews[i]};
+        VkImageView attachments[] = {swapChainImageViews[i], depthImageView};
         
         VkFramebufferCreateInfo framebufferInfo = {};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = renderPass;
-        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.attachmentCount = 2;
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = swapChainExtent.width;
         framebufferInfo.height = swapChainExtent.height;
