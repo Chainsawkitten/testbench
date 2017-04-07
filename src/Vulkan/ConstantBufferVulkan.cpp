@@ -137,7 +137,7 @@ void ConstantBufferVulkan::createDescriptorLayout() {
     layoutInfo.pBindings = &uniformLayoutBinding;
     
     if (vkCreateDescriptorSetLayout(logicalDevice, &layoutInfo, nullptr, &layoutMap[location]))
-        std::cerr << "Could not create descriptor set!" << std::endl;
+        std::cerr << "Could not create descriptor set layout!" << std::endl;
 }
 
 void ConstantBufferVulkan::createDescriptorSet(VkDeviceSize size) {
